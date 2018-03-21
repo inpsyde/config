@@ -12,7 +12,7 @@ $ composer require inpsyde/config
 
 ## Usage
 
-### Config interface
+### The Config interface
 
 ```
 namespace Inpsyde\Config;
@@ -33,7 +33,7 @@ This interface reminds of PSR-11 and I considered to extend or simply use PRS-11
 Also mixing up DI-Containers with config containers is not a good thing as both targeting different purposes.
 
 
-### Setup/Config declaration
+### Configuration schema
 
 ```php
 return [
