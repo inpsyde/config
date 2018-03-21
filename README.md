@@ -30,7 +30,7 @@ interface Config
 ```
 This interface reminds of PSR-11 and I considered to extend or simply use PRS-11 as interface but the documentation says that it is explicitly meant as common interface for [_dependency injection containers_](https://www.php-fig.org/psr/psr-11/).
 
-Also mixing up DI-Containers with config containers is not a good thing as both 
+Also mixing up DI-Containers with config containers is not a good thing as both targeting different purposes.
 
 
 ### Setup/Config declaration
