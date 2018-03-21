@@ -1,0 +1,38 @@
+{
+    "name": "inpsyde/dev1-config",
+    "description": "Key-value config management",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Inpsyde GmbH",
+            "homepage": "https://inpsyde.com/",
+            "email": "hallo@inpsyde.com",
+            "role": "Company"
+        },
+        {
+            "name": "David Naber",
+            "email": "d.naber@inpsyde.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "inpsyde/php-coding-standards": "@stable",
+        "inpsyde/monkery-test-case": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Inpsyde\\Config\\": "src/"
+        }
+    },
+    "scripts": {
+        "ci": [
+            "vendor/bin/phpcs"
+        ]
+    }
+}
