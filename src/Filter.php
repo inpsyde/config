@@ -6,33 +6,39 @@ namespace Inpsyde\Config;
 class Filter
 {
 
-    public function filterVariable($variable, array $schema)
+    /**
+     * @param mixed $variable
+     * @param array $schema
+     *
+     * @return mixed
+     */
+    public function filterValue($variable, array $schema)
     {
         if (! $schema['filter']) {
             return $variable;
         }
 
-        $filterDefinition = $schema['filter'];
-        $filterOptions = $filterDefinition['filter_options'];
-
-        if ($filterDefinition['filter_flags']) {
-            $filterOptions['flags'] = $filterDefinition['filter_flags'];
-        }
-        if ($filterDefinition['filter_cb']) {
-            $filterOptions['options'] = $filterDefinition['filter_cb'];
+        if (is_callable($schema['filter'])) {
+            return $schema['filter']($variable, $schema);
         }
 
-        return filter_var($variable, $filterDefinition['filter'], $filterOptions);
+        return filter_var($variable, $schema['filter']);
     }
 
-    public function validateVariable($variable, array $schema): bool
+    /**
+     * @param mixed $variable
+     * @param array $schema
+     *
+     * @return bool
+     */
+    public function validateValue($variable, array $schema): bool
     {
-        if (FILTER_CALLBACK === $schema['filter']['filter']) {
-            return true;
+        try {
+            $variable = $this->filterValue($variable, $schema);
+
+            return false !== $variable || FILTER_VALIDATE_BOOLEAN !== $schema['filter'];
+        } catch (\Throwable $e) {
+            return false;
         }
-
-        $variable = $this->filterVariable($variable, $schema);
-
-        return false !== $variable || FILTER_VALIDATE_BOOLEAN !== $schema['filter']['filter'];
     }
 }

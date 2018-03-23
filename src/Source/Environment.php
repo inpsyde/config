@@ -45,7 +45,7 @@ final class Environment implements Source
 
         return false === $var
             ? $var
-            : $this->filter->validateVariable($var, $this->schema->getDefinition($key));
+            : $this->filter->validateValue($var, $this->schema->getDefinition($key));
     }
 
     private function getName(string $key): string
