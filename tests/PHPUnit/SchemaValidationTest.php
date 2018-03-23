@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Inpsyde\Config;
 
@@ -16,7 +16,6 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
      */
     public function testValidateSchema(array $schema, array $expected)
     {
-
         $testee = new SchemaValidation();
         $schema = $testee->validateSchema($schema);
 
@@ -39,11 +38,32 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
      */
     public function validateSchemaData(): array
     {
-
-        if (!self::$testData) {
+        if (! self::$testData) {
             self::$testData = require __DIR__.'/../data/schema-validation.php';
         }
 
         return self::$testData['testValidateSchema'];
+    }
+
+    /**
+     * @dataProvider validateSchemaThrowsExceptionData
+     */
+    public function testValidateSchemaThrowsException(array $schema, string $expectedException)
+    {
+        self::expectException($expectedException);
+        (new SchemaValidation())->validateSchema($schema);
+    }
+
+    /**
+     * @see testValidateSchemaThrowsException
+     */
+    public function validateSchemaThrowsExceptionData(): array
+    {
+
+        if (! self::$testData) {
+            self::$testData = require __DIR__.'/../data/schema-validation.php';
+        }
+
+        return self::$testData['testValidateSchemaThrowsException'];
     }
 }
