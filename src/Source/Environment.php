@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Inpsyde\Config\Source;
 
 use Inpsyde\Config\Exception\MissingConfig;
+use Inpsyde\Config\Exception\MissingDefaultValue;
 use Inpsyde\Config\Filter;
 use Inpsyde\Config\Schema;
 
@@ -21,6 +22,17 @@ final class Environment implements Source
     private $schema;
 
     /**
+     * @param Filter $filter
+     * @param Schema $schema
+     */
+    public function __construct(Schema $schema, Filter $filter = null)
+    {
+        $this->schema = $schema;
+        $this->filter = $filter
+            ?: new Filter();
+    }
+
+    /**
      * @inheritdoc
      */
     public function get(string $key)
@@ -29,7 +41,13 @@ final class Environment implements Source
             throw new MissingConfig("Missing env config: '{$key}'");
         }
 
-        //Todo
+        $name = $this->getName($key);
+        $value = getenv($name);
+        if (false === $value && $this->hasDefault($key)) {
+            return $this->getDefault($key);
+        }
+
+        return $this->filter->filterValue($value, $this->schema->getDefinition($key));
     }
 
     /**
@@ -43,8 +61,12 @@ final class Environment implements Source
         }
         $var = getenv($name);
 
+        if (false === $var && $this->hasDefault($key)) {
+            return true;
+        }
+
         return false === $var
-            ? $var
+            ? false
             : $this->filter->validateValue($var, $this->schema->getDefinition($key));
     }
 
@@ -55,5 +77,25 @@ final class Environment implements Source
         return empty($definition)
             ? ''
             : $definition['source_name'];
+    }
+
+    private function hasDefault(string $key): bool
+    {
+        return array_key_exists(
+            'default_value',
+            $this->schema->getDefinition($key)
+        );
+    }
+
+    /**
+     * @throws MissingDefaultValue
+     */
+    private function getDefault(string $key)
+    {
+        if (! $this->hasDefault($key)) {
+            throw new MissingDefaultValue("Key: '{$key}'");
+        }
+
+        return $this->schema->getDefinition($key)['default_value'];
     }
 }
