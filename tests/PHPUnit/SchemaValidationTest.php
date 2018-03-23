@@ -8,6 +8,8 @@ use MonkeryTestCase\BrainMonkeyWpTestCase;
 class SchemaValidationTest extends BrainMonkeyWpTestCase
 {
 
+    private static $testData = [];
+
     /**
      * @dataProvider validateSchemaData
      * @throws \Throwable
@@ -38,6 +40,10 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
     public function validateSchemaData(): array
     {
 
-        return require __DIR__ . '/../data/validate-schema-test-data.php';
+        if (!self::$testData) {
+            self::$testData = require __DIR__.'/../data/validate-schema-test-data.php';
+        }
+
+        return self::$testData['testValidateSchema'];
     }
 }

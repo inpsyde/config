@@ -8,54 +8,56 @@ $filterCallback01 = function ($value) {
 };
 
 return [
-    '01: test complete valid definition' => [
-        'schema' => [
-            'some.config.key' => [
-                'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'default_value' => '',
-                'filter' => $filterCallback01,
+    'testValidateSchema' => [
+        '01: test complete valid definition' => [
+            'schema' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
+                    'source_name' => 'SOME_ENV_VARIABLE',
+                    'default_value' => '',
+                    'filter' => $filterCallback01,
+                ],
+            ],
+            'expected' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
+                    'source_name' => 'SOME_ENV_VARIABLE',
+                    'default_value' => '',
+                    'filter' => $filterCallback01,
+                ],
             ],
         ],
-        'expected' => [
-            'some.config.key' => [
-                'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'default_value' => '',
-                'filter' => $filterCallback01,
+        '02: no filter given' => [
+            'schema' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
+                    'source_name' => 'SOME_ENV_VARIABLE',
+                    'default_value' => '',
+                ],
+            ],
+            'expected' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
+                    'source_name' => 'SOME_ENV_VARIABLE',
+                    'default_value' => '',
+                    'filter' => null,
+                ],
             ],
         ],
-    ],
-    '02: no filter given' => [
-        'schema' => [
-            'some.config.key' => [
-                'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'default_value' => '',
+        '03: no default value given' => [
+            'schema' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
+                    'source_name' => 'SOME_ENV_VARIABLE',
+                    'filter' => FILTER_SANITIZE_EMAIL,
+                ],
             ],
-        ],
-        'expected' => [
-            'some.config.key' => [
-                'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'default_value' => '',
-                'filter' => null,
-            ],
-        ],
-    ],
-    '03: no default value given' => [
-        'schema' => [
-            'some.config.key' => [
-                'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'filter' => FILTER_SANITIZE_EMAIL,
-            ],
-        ],
-        'expected' => [
-            'some.config.key' => [
-                'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'filter' => FILTER_SANITIZE_EMAIL,
+            'expected' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
+                    'source_name' => 'SOME_ENV_VARIABLE',
+                    'filter' => FILTER_SANITIZE_EMAIL,
+                ],
             ],
         ],
     ],
