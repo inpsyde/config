@@ -20,7 +20,7 @@ class SchemaValidation
             }
         );
 
-        return new Schema($schema);
+        return new Schema($this->schema);
     }
 
     /**
@@ -145,6 +145,7 @@ class SchemaValidation
             FILTER_FLAG_QUERY_REQUIRED,
         ];
 
+        // Todo: allow bitwise disjunction of multiple flags
         if (! null === $filterDefinition['filter_flags']
             && ! in_array(
                 $filterDefinition['filter_flags'],
