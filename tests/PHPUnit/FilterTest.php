@@ -27,7 +27,7 @@ class FilterTest extends BrainMonkeyWpTestCase
     public function filterValueData(): array
     {
         if (! self::$testData) {
-            self::$testData = require __DIR__.'/../data/filter-value-test-data.php';
+            self::$testData = require __DIR__.'/../data/filter.php';
         }
 
         return self::$testData['testFilterValue'];
@@ -50,7 +50,7 @@ class FilterTest extends BrainMonkeyWpTestCase
     public function validateValueData(): array
     {
         if (! self::$testData) {
-            self::$testData = require __DIR__.'/../data/filter-value-test-data.php';
+            self::$testData = require __DIR__.'/../data/filter.php';
         }
 
         return self::$testData['testValidateValue'];

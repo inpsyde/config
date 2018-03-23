@@ -41,7 +41,7 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
     {
 
         if (!self::$testData) {
-            self::$testData = require __DIR__.'/../data/validate-schema-test-data.php';
+            self::$testData = require __DIR__.'/../data/schema-validation.php';
         }
 
         return self::$testData['testValidateSchema'];
