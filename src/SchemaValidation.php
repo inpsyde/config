@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Inpsyde\Config;
 
@@ -10,21 +10,21 @@ class SchemaValidation
 
     private $schema = [];
 
-    public function validateSchema(array $schema) : Schema
+    public function validateSchema(array $schema): Schema
     {
-
         $this->schema = [];
-        array_walk($schema, function (...$args) {
-
-            $this->validateKey(...$args);
-        });
+        array_walk(
+            $schema,
+            function (...$args) {
+                $this->validateKey(...$args);
+            }
+        );
 
         return new Schema($schema);
     }
 
     private function validateKey($definition, $key)
     {
-
         if (! is_string($key)) {
             throw new InvalidSchema('Schema must be an associative array');
         }
@@ -39,12 +39,11 @@ class SchemaValidation
 
         $definition = $this->ensureRequiredDefinition($definition, $key);
         $definition = $this->validateFilter($definition, $key);
-        $this->schema[ $key ] = $definition;
+        $this->schema[$key] = $definition;
     }
 
-    private function ensureRequiredDefinition(array $definition, string $key) : array
+    private function ensureRequiredDefinition(array $definition, string $key): array
     {
-
         foreach (['source', 'source_name'] as $requiredDefinition) {
             if (! array_key_exists($requiredDefinition, $definition)) {
                 throw new InvalidSchema(
@@ -56,31 +55,29 @@ class SchemaValidation
         return $definition;
     }
 
-    private function validateFilter(array $definition, string $key) : array
+    private function validateFilter(array $definition, string $key): array
     {
-
-        if (! array_key_exists('filter', $definition) || null === $definition[ 'filter' ]) {
-            $definition[ 'filter' ] = null;
+        if (! array_key_exists('filter', $definition) || null === $definition['filter']) {
+            $definition['filter'] = null;
 
             return $definition;
         }
 
-        $filterDefinition = &$definition[ 'filter' ];
+        $filterDefinition = &$definition['filter'];
         if (! array_key_exists('filter', $filterDefinition)) {
-
             throw new InvalidSchema("Missing 'filter' for key {$key}");
         }
 
         if (array_key_exists('filter_options', $filterDefinition)) {
-            if (! is_array($filterDefinition[ 'filter_options' ])) {
+            if (! is_array($filterDefinition['filter_options'])) {
                 throw new InvalidSchema("filter_options must be an array for key '{$key}'");
             }
         } else {
-            $filterDefinition[ 'filter_options' ] = [];
+            $filterDefinition['filter_options'] = [];
         }
 
         if (! array_key_exists('filter_flags', $filterDefinition)) {
-            $filterDefinition[ 'filter_flags' ] = null;
+            $filterDefinition['filter_flags'] = null;
         }
 
         $availableFilters = [
@@ -103,16 +100,15 @@ class SchemaValidation
             FILTER_UNSAFE_RAW,
         ];
 
-        if (! in_array($filterDefinition[ 'filter' ], $availableFilters, true)) {
+        if (! in_array($filterDefinition['filter'], $availableFilters, true)) {
             throw new InvalidSchema("Filter is not valid for key '{$key}'");
         }
 
-        if (FILTER_CALLBACK === $filterDefinition[ 'filter' ]) {
+        if (FILTER_CALLBACK === $filterDefinition['filter']) {
             if (! array_key_exists('filter_cb', $filterDefinition)) {
                 throw new InvalidSchema("Missing 'filter_cb' for key '{$key}'");
             }
-            if (! is_callable($filterDefinition[ 'filter_cb' ])) {
-
+            if (! is_callable($filterDefinition['filter_cb'])) {
                 throw new InvalidSchema("Filter callback is not callable for key '{$key}'");
             }
         } else {
@@ -140,7 +136,12 @@ class SchemaValidation
             FILTER_FLAG_QUERY_REQUIRED,
         ];
 
-        if (! null === $filterDefinition['filter_flags'] && ! in_array($filterDefinition[ 'filter_flags' ], $availableFilterFlags, true)) {
+        if (! null === $filterDefinition['filter_flags']
+            && ! in_array(
+                $filterDefinition['filter_flags'],
+                $availableFilterFlags,
+                true
+            )) {
             throw new InvalidSchema("Unknown filter_flag for key '{$key}'");
         }
 

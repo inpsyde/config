@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Inpsyde\Config;
 
@@ -11,5 +11,5 @@ interface Config
      */
     public function get(string $key);
 
-    public function has(string $key) : bool;
+    public function has(string $key): bool;
 }

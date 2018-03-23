@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Inpsyde\Config\Source;
 
@@ -27,11 +27,10 @@ final class Environment implements Source
         }
     }
 
-    public function has(string $key) : bool
+    public function has(string $key): bool
     {
-
         $name = $this->getName($key);
-        if (!$name) {
+        if (! $name) {
             return false;
         }
         $var = getenv($name);
@@ -41,7 +40,7 @@ final class Environment implements Source
             : $this->filter->validateVariable($var, $this->schema->getDefinition($key));
     }
 
-    private function getName(string $key) : string
+    private function getName(string $key): string
     {
         $definition = $this->schema->getDefinition($key);
 

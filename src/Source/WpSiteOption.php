@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Inpsyde\Config\Source;
 
@@ -11,9 +11,8 @@ final class WpSiteOption implements Source
         // TODO: Implement get() method.
     }
 
-    public function has(string $key) : bool
+    public function has(string $key): bool
     {
         // TODO: Implement has() method.
     }
-
 }
