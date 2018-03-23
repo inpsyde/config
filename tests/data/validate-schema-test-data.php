@@ -8,6 +8,8 @@ $test02Closure = function (): string {
     return 'default value';
 };
 
+$filterCallback01 = function(){};
+
 return [
     '01: test complete valid definition' => [
         'schema' => [
@@ -18,8 +20,7 @@ return [
                 'filter' => [
                     'filter' => FILTER_CALLBACK,
                     'filter_flags' => null,
-                    'filter_cb' => function () {
-                    },
+                    'filter_cb' => $filterCallback01,
                     'filter_options' => [],
                 ],
             ],
@@ -32,8 +33,7 @@ return [
                 'filter' => [
                     'filter' => FILTER_CALLBACK,
                     'filter_flags' => null,
-                    'filter_cb' => function () {
-                    },
+                    'filter_cb' => $filterCallback01,
                     'filter_options' => [],
                 ],
             ],

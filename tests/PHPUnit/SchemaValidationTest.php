@@ -10,6 +10,7 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider validateSchemaData
+     * @throws \Throwable
      */
     public function testValidateSchema(array $schema, array $expected)
     {
