@@ -23,6 +23,9 @@ class SchemaValidation
         return new Schema($schema);
     }
 
+    /**
+     * @throws InvalidSchema
+     */
     private function validateKey($definition, $key)
     {
         if (! is_string($key)) {
@@ -42,6 +45,9 @@ class SchemaValidation
         $this->schema[$key] = $definition;
     }
 
+    /**
+     * @throws InvalidSchema
+     */
     private function ensureRequiredDefinition(array $definition, string $key): array
     {
         foreach (['source', 'source_name'] as $requiredDefinition) {
@@ -55,6 +61,9 @@ class SchemaValidation
         return $definition;
     }
 
+    /**
+     * @throws InvalidSchema
+     */
     private function validateFilter(array $definition, string $key): array
     {
         if (! array_key_exists('filter', $definition) || null === $definition['filter']) {

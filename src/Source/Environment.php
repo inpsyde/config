@@ -20,13 +20,21 @@ final class Environment implements Source
      */
     private $schema;
 
+    /**
+     * @inheritdoc
+     */
     public function get(string $key)
     {
-        if (! $this->get($key)) {
+        if (! $this->has($key)) {
             throw new MissingConfig("Missing env config: '{$key}'");
         }
+
+        //Todo
     }
 
+    /**
+     * @inheritdoc
+     */
     public function has(string $key): bool
     {
         $name = $this->getName($key);
