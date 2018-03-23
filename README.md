@@ -39,7 +39,8 @@ Also mixing up DI-Containers with config containers is not a good thing as both 
 return [
     /**
      * pass the value through filter_var()
-     * using FILTER_VALIDATE_URL
+     * using FILTER_VALIDATE_URL;
+     * define an optional default value
      */
     'message.api.endpoint' => [
         'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
@@ -54,7 +55,6 @@ return [
     'domain.some.key' => [
         'source' => \Inpsyde\Config\Source\Source::SOURCE_WP_SITEOPTION,
         'source_name' => '_option_key',
-        'default_value' => 2.5,
         'filter' => FILTER_VALIDATE_FLOAT,
     ],
     /**
