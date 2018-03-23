@@ -72,25 +72,15 @@ class SchemaValidation
             return $definition;
         }
 
-        $filterDefinition = &$definition['filter'];
-        if (! array_key_exists('filter', $filterDefinition)) {
-            throw new InvalidSchema("Missing 'filter' for key {$key}");
+        if (is_callable($definition['filter'])) {
+            return $definition;
         }
 
-        if (array_key_exists('filter_options', $filterDefinition)) {
-            if (! is_array($filterDefinition['filter_options'])) {
-                throw new InvalidSchema("filter_options must be an array for key '{$key}'");
-            }
-        } else {
-            $filterDefinition['filter_options'] = [];
-        }
-
-        if (! array_key_exists('filter_flags', $filterDefinition)) {
-            $filterDefinition['filter_flags'] = null;
+        if (! is_int($definition['filter'])) {
+            throw new InvalidSchema("Filter must be either callable or integer for key '{$key}'");
         }
 
         $availableFilters = [
-            FILTER_CALLBACK,
             FILTER_VALIDATE_BOOLEAN,
             FILTER_VALIDATE_EMAIL,
             FILTER_VALIDATE_FLOAT,
@@ -109,50 +99,8 @@ class SchemaValidation
             FILTER_UNSAFE_RAW,
         ];
 
-        if (! in_array($filterDefinition['filter'], $availableFilters, true)) {
+        if (! in_array($definition['filter'], $availableFilters, true)) {
             throw new InvalidSchema("Filter is not valid for key '{$key}'");
-        }
-
-        if (FILTER_CALLBACK === $filterDefinition['filter']) {
-            if (! array_key_exists('filter_cb', $filterDefinition)) {
-                throw new InvalidSchema("Missing 'filter_cb' for key '{$key}'");
-            }
-            if (! is_callable($filterDefinition['filter_cb'])) {
-                throw new InvalidSchema("Filter callback is not callable for key '{$key}'");
-            }
-        } else {
-            $filterDefinition['filter_cb'] = null;
-        }
-
-        $availableFilterFlags = [
-            FILTER_FLAG_STRIP_LOW,
-            FILTER_FLAG_STRIP_HIGH,
-            FILTER_FLAG_ALLOW_FRACTION,
-            FILTER_FLAG_ALLOW_THOUSAND,
-            FILTER_FLAG_ALLOW_SCIENTIFIC,
-            FILTER_FLAG_NO_ENCODE_QUOTES,
-            FILTER_FLAG_ENCODE_LOW,
-            FILTER_FLAG_ENCODE_HIGH,
-            FILTER_FLAG_ENCODE_AMP,
-            FILTER_NULL_ON_FAILURE,
-            FILTER_FLAG_ALLOW_OCTAL,
-            FILTER_FLAG_ALLOW_HEX,
-            FILTER_FLAG_IPV4,
-            FILTER_FLAG_IPV6,
-            FILTER_FLAG_NO_PRIV_RANGE,
-            FILTER_FLAG_NO_RES_RANGE,
-            FILTER_FLAG_PATH_REQUIRED,
-            FILTER_FLAG_QUERY_REQUIRED,
-        ];
-
-        // Todo: allow bitwise disjunction of multiple flags
-        if (! null === $filterDefinition['filter_flags']
-            && ! in_array(
-                $filterDefinition['filter_flags'],
-                $availableFilterFlags,
-                true
-            )) {
-            throw new InvalidSchema("Unknown filter_flag for key '{$key}'");
         }
 
         return $definition;

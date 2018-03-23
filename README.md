@@ -37,42 +37,42 @@ Also mixing up DI-Containers with config containers is not a good thing as both 
 
 ```php
 return [
+    /**
+     * pass the value through filter_var()
+     * using FILTER_VALIDATE_URL
+     */
     'message.api.endpoint' => [
         'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
         'source_name' => 'SOME_ENV_VARIABLE',
         'default_value' => 'http://api.tld/endpoint',
-        'filter' => [
-            'filter' => FILTER_VALIDATE_URL,
-        ],
+        'filter' => FILTER_VALIDATE_URL,
     ],
+    /**
+     * pass the value through filter_var()
+     * using FILTER_VALIDATE_FLOAT
+     */
     'domain.some.key' => [
         'source' => \Inpsyde\Config\Source\Source::SOURCE_WP_SITEOPTION,
         'source_name' => '_option_key',
         'default_value' => 2.5,
-        'filter' => [
-            'filter' => FILTER_VALIDATE_FLOAT,
-        ],
+        'filter' => FILTER_VALIDATE_FLOAT,
     ],
     /**
-     * even though the following example doesn't make
-     * much sense, it is just in place to demonstrate
-     * the filter callback method
+     * if you want a more complex filter, just pass a
+     * callable as filter parameter:
      */
     'domain.some.komplex_value' => [
         'source' => \Inpsyde\Config\Source\Source::SOURCE_WP_OPTION,
         'source_name' => '_option_key',
         'default_value' => null,
-        'filter' => [
-            'filter' => FILTER_CALLBACK,
-            'filter_cb' => function($userId): \WP_User {
-                $user = wp_get_user($userId);
-                if (!$user instance of \WP_User) {
-                    throw new ConfigException();
-                }
-                
-                return $user;
-            }
-        ],
+        'filter' => function($value): string {
+
+            return filter_var(
+                $value,
+                FILTER_SANITIZE_ENCODED,
+                FILTER_FLAG_STRIP_HIGH & FILTER_FLAG_STRIP_BACKTICK
+            );
+        },
     ],
 ];
 ```
