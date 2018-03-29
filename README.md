@@ -82,7 +82,7 @@ With this declaration in place getting the configuration is as easy as:
 ```
 $apiUrl = $config->get('message.api.endpoint');
 $floatValue = $config->get('domain.some.key');
-$superUser = $config->get('domain.some.komplex_value');
+$customFilteredValue = $config->get('domain.some.komplex_value');
 ```
 
 ## Roadmap
