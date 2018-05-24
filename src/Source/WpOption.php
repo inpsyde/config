@@ -71,7 +71,11 @@ final class WpOption implements Source
 
         $value = ($this->optionLoader)($name, $defaultValue);
 
-        return false !== $value || $value === $defaultValue
+        if ($value === $defaultValue) {
+            return true;
+        }
+
+        return false !== $value
             ? $this->filter->validateValue($value, $this->schema->getDefinition($key))
             : false;
     }
