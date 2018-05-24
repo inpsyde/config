@@ -18,12 +18,13 @@ class WpOptionTest extends BrainMonkeyWpTestCase
         $schema = \Mockery::mock(Schema::class);
         $filter = \Mockery::mock(Filter::class);
 
-        $schema->expects('getDefinition')
-            ->times(5)
+        $schema->shouldReceive('getDefinition')
+            ->atLeast()
+            ->times(3)
             ->with($data['key'])
             ->andReturn($data['schema']);
 
-        $filter->expects('validateValue')
+        $filter->shouldReceive('validateValue')
             ->once()
             ->with($data['value'], $data['schema'])
             ->andReturn($mocks['filterValidates']);
