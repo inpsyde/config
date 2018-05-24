@@ -1,6 +1,6 @@
 # Inpsyde Config
 
-Key-value config management. The package provides a simple interface to read configuration regardless where the configuration is actually stored (either in an environment variable or WordPress option table or constant).
+Key-value config management. The package provides a simple interface to read configuration regardless how the configuration is actually provided (either by an environment variable or WordPress option table or a PHP constant).
 
 The implementation provides an easy-to-use declaration for configuration sources and filtering/validating.
 
