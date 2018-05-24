@@ -10,7 +10,8 @@ class Filter
      * @param mixed $variable
      * @param array $schema
      *
-     * @return mixed
+     * @return mixed Returns false if value is not filterable (invalid)
+     * or if FILTER_VALIDATE_BOOLEAN is set as filter and the value is actually false
      */
     public function filterValue($variable, array $schema)
     {
@@ -36,6 +37,7 @@ class Filter
         try {
             $variable = $this->filterValue($variable, $schema);
 
+            // false is a valid value if the filter is set to FILTER_VALIDATE_BOOLEAN
             return false !== $variable || FILTER_VALIDATE_BOOLEAN !== $schema['filter'];
         } catch (\Throwable $e) {
             return false;
