@@ -11,30 +11,30 @@ final class ConfigComposition implements Config
     /**
      * @var Config[]
      */
-    private $components = [];
+    private $sources = [];
 
     /**
-     * @param Config[] $components
+     * @param Config[] $sources
      */
-    public function __construct(array $components)
+    public function __construct(array $sources)
     {
-        $this->components = $components;
+        $this->sources = $sources;
     }
 
     public function get(string $key)
     {
-        if (! array_key_exists($key, $this->components)){
+        if (! array_key_exists($key, $this->sources)){
             throw new MissingConfig("No configuration configured for '{$key}'");
         }
 
-        return $this->components[$key]
+        return $this->sources[$key]
             ->get($key);
     }
 
     public function has(string $key): bool
     {
-        return array_key_exists($key, $this->components)
-            ? $this->components[$key]->has($key)
+        return array_key_exists($key, $this->sources)
+            ? $this->sources[$key]->has($key)
             : false;
     }
 }
