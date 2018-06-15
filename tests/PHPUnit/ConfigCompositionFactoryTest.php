@@ -1,0 +1,111 @@
+<?php
+declare(strict_types=1);
+
+namespace Inpsyde\Config;
+
+use Inpsyde\Config\Source\Environment;
+use Inpsyde\Config\Source\Source;
+use Inpsyde\Config\Source\WpOption;
+use MonkeryTestCase\BrainMonkeyWpTestCase;
+
+class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
+{
+
+    /**
+     * @dataProvider buildSourcesListData
+     */
+    public function testBuildSourcesList(
+        array $definition,
+        array $keysBySource,
+        array $expectations
+    ) {
+        $schemaValidator = \Mockery::mock(SchemaValidation::class);
+        $schema = \Mockery::mock(Schema::class);
+
+        $schema->shouldReceive('getKeys')
+            ->andReturnUsing(
+                function ($source) use ($keysBySource): array {
+                    return array_key_exists($source, $keysBySource)
+                        ? $keysBySource[$source]
+                        : [];
+                }
+            );
+
+        $schemaValidator->shouldReceive('validateSchema')
+            ->with($definition)
+            ->andReturn($schema);
+
+        $testee = new ConfigCompositionFactory($schemaValidator);
+        $sourceList = $testee->buildSourcesList($definition);
+
+        self::assertEquals(
+            array_keys($expectations),
+            array_keys($sourceList),
+            "Sources list does not match expected keys",
+            0.0,
+            10,
+            true // order of array elements is not relevant
+        );
+
+        foreach ( $expectations as $key => $sourceType ) {
+            self::assertInstanceOf(
+                $sourceType,
+                $sourceList[$key],
+                "Test failed for key {$key}"
+            );
+        }
+    }
+
+    /**
+     * @see testBuildSourcesList
+     */
+    public function buildSourcesListData(): array
+    {
+        return [
+            [
+                'definition' => [
+                    'config.env.one' => [
+                        'source' => Source::SOURCE_ENV,
+                    ],
+                    'config.env.two' => [
+                        'source' => Source::SOURCE_ENV,
+                    ],
+                    'config.env.three' => [
+                        'source' => Source::SOURCE_ENV,
+                    ],
+                    'config.option.one' => [
+                        'source' => Source::SOURCE_WP_OPTION,
+                    ],
+                    'config.option.two' => [
+                        'source' => Source::SOURCE_WP_OPTION,
+                    ],
+                    'config.siteoption.one' => [
+                        'source' => Source::SOURCE_WP_SITEOPTION,
+                    ]
+                ],
+                'keysBySource' => [
+                    Source::SOURCE_ENV => [
+                        'config.env.one',
+                        'config.env.two',
+                        'config.env.three',
+                    ],
+                    Source::SOURCE_WP_OPTION => [
+                        'config.option.one',
+                        'config.option.two',
+                    ],
+                    Source::SOURCE_WP_SITEOPTION => [
+                        'config.siteoption.one',
+                    ]
+                ],
+                'expectations' => [
+                    'config.env.one' => Environment::class,
+                    'config.env.two' => Environment::class,
+                    'config.env.three' => Environment::class,
+                    'config.option.one' => WpOption::class,
+                    'config.option.two' => WpOption::class,
+                    'config.siteoption.one' => WpOption::class,
+                ],
+            ],
+        ];
+    }
+}
