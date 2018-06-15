@@ -90,6 +90,8 @@ $customFilteredValue = $config->get('domain.some.komplex_value');
  * Complete tests and implementation
  * Change current working name `inpsyde/dev1-config` to `inpsyde/config` if everyone agrees
  * Maybe think about namespace support to split config objects into sub-config that is only aware of a specific namespace. As namespace separator the `.` is considered to be used.
+ * Maybe allow `callable` as default value factory
+ * Define a stack of sources for a single key to fall back to another source if the primary one is not defined (e.g. allow a default setting for multisite that can be overridden for a single site)
 
 ## Crafted by Inpsyde
 
