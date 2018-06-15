@@ -14,6 +14,8 @@ final class ConfigComposition implements Config
     private $sources = [];
 
     /**
+     * Expects a parameter in [ $key => Config $config ] format
+     *
      * @param Config[] $sources
      */
     public function __construct(array $sources)

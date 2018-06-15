@@ -24,6 +24,9 @@ class Schema
         );
     }
 
+    /**
+     * @return string[]
+     */
     public function getKeys(string $source = ''): array
     {
         return $source
