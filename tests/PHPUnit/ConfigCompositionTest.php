@@ -17,7 +17,7 @@ class ConfigCompositionTest extends BrainMonkeyWpTestCase
 
         self::assertSame(
             $expected,
-            (new ConfigComposition($components))->get($key)
+            (new Container($components))->get($key)
         );
     }
 
@@ -60,7 +60,7 @@ class ConfigCompositionTest extends BrainMonkeyWpTestCase
 
         self::assertSame(
             $expected,
-            (new ConfigComposition($components))->has($key)
+            (new Container($components))->has($key)
         );
     }
 

@@ -8,7 +8,7 @@ use Inpsyde\Config\Source\Environment;
 use Inpsyde\Config\Source\Source;
 use Inpsyde\Config\Source\WpOption;
 
-class ConfigCompositionFactory
+class ContainerFactory
 {
 
     /**
@@ -24,9 +24,9 @@ class ConfigCompositionFactory
         $this->validator = $validator;
     }
 
-    public function buildConfig(array $schema): Config
+    public function buildContainer(array $schema): Config
     {
-        return new ConfigComposition(
+        return new Container(
             $this->buildSourcesList($schema)
         );
     }

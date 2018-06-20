@@ -5,7 +5,7 @@ namespace Inpsyde\Config;
 
 use Inpsyde\Config\Exception\MissingConfig;
 
-final class ConfigComposition implements Config
+final class Container implements Config
 {
 
     /**

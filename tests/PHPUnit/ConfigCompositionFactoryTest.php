@@ -36,7 +36,7 @@ class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
             ->with($definition)
             ->andReturn($schema);
 
-        $testee = new ConfigCompositionFactory($schemaValidator);
+        $testee = new ContainerFactory($schemaValidator);
         $sourceList = $testee->buildSourcesList($definition);
 
         self::assertEquals(
