@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Inpsyde\Config\Source;
 
 use Inpsyde\Config\Exception\MissingConfig;
-use Inpsyde\Config\Exception\MissingDefaultValue;
 use Inpsyde\Config\Filter;
+use Inpsyde\Config\Helper\SchemaReader;
 use Inpsyde\Config\Schema;
 
 final class WpOption implements Source
@@ -22,15 +22,27 @@ final class WpOption implements Source
     private $schema;
 
     /**
+     * @var SchemaReader
+     */
+    private $reader;
+
+    /**
      * @var Filter
      */
     private $filter;
 
-    public function __construct(callable $optionLoader, Schema $schema, Filter $filter = null)
-    {
+    public function __construct(
+        callable $optionLoader,
+        Schema $schema,
+        Filter $filter = null,
+        SchemaReader $reader = null
+    ) {
         $this->optionLoader = $optionLoader;
-        $this->filter = $filter;
         $this->schema = $schema;
+        $this->filter = $filter
+            ?: new Filter();
+        $this->reader = $reader
+            ?: new SchemaReader();
     }
 
     /**
@@ -42,11 +54,11 @@ final class WpOption implements Source
             throw new MissingConfig("Missing wp option config: '{$key}'");
         }
 
-        $name = $this->getName($key);
+        $name = $this->reader->sourceName($key, $this->schema);
         $value = ($this->optionLoader)($name);
 
-        if (false === $value && $this->hasDefault($key)) {
-            return $this->getDefault($key);
+        if (false === $value && $this->reader->hasDefault($key, $this->schema)) {
+            return $this->reader->defaultValue($key, $this->schema);
         }
 
         return $this->filter->filterValue(
@@ -60,13 +72,13 @@ final class WpOption implements Source
      */
     public function has(string $key): bool
     {
-        $name = $this->getName($key);
+        $name = $this->reader->sourceName($key, $this->schema);
         if (! $name) {
             return false;
         }
 
-        $defaultValue = $this->hasDefault($key)
-            ? $this->getDefault($key)
+        $defaultValue = $this->reader->hasDefault($key, $this->schema)
+            ? $this->reader->defaultValue($key, $this->schema)
             : false;
 
         $value = ($this->optionLoader)($name, $defaultValue);
@@ -104,34 +116,5 @@ final class WpOption implements Source
             $schema,
             $filter
         );
-    }
-
-    private function getName(string $key): string
-    {
-        $definition = $this->schema->getDefinition($key);
-
-        return empty($definition)
-            ? ''
-            : $definition['source_name'];
-    }
-
-    private function hasDefault(string $key): bool
-    {
-        return array_key_exists(
-            'default_value',
-            $this->schema->getDefinition($key)
-        );
-    }
-
-    /**
-     * @throws MissingDefaultValue
-     */
-    private function getDefault(string $key)
-    {
-        if (! $this->hasDefault($key)) {
-            throw new MissingDefaultValue("Key: '{$key}'");
-        }
-
-        return $this->schema->getDefinition($key)['default_value'];
     }
 }

@@ -6,6 +6,7 @@ namespace Inpsyde\Config\Source;
 use Inpsyde\Config\Exception\MissingConfig;
 use Inpsyde\Config\Exception\MissingDefaultValue;
 use Inpsyde\Config\Filter;
+use Inpsyde\Config\Helper\SchemaReader;
 use Inpsyde\Config\Schema;
 
 final class Constant implements Source
@@ -21,15 +22,19 @@ final class Constant implements Source
      */
     private $filter;
 
+    private $reader;
+
     /**
      * @param Schema $schema
      * @param Filter $filter
      */
-    public function __construct(Schema $schema, Filter $filter = null)
+    public function __construct(Schema $schema, Filter $filter = null, SchemaReader $reader = null)
     {
         $this->schema = $schema;
         $this->filter = $filter
             ?: new Filter();
+        $this->reader = $reader
+            ?: new SchemaReader();
     }
 
     /**
@@ -41,20 +46,20 @@ final class Constant implements Source
             throw new MissingConfig("Missing env config: '{$key}'");
         }
 
-        $name = $this->getName($key);
-        if(defined($name)) {
+        $name = $this->reader->sourceName($key, $this->schema);
+        if (defined($name)) {
             return $this->filter->filterValue(
                 constant($name),
                 $this->schema->getDefinition($key)
             );
         }
 
-        return $this->getDefault($key);
+        return $this->reader->defaultValue($key, $this->schema);
     }
 
     public function has(string $key): bool
     {
-        $name = $this->getName($key);
+        $name = $this->reader->sourceName($key, $this->schema);
         if (! $name) {
             return false;
         }
@@ -66,35 +71,6 @@ final class Constant implements Source
             );
         }
 
-        return $this->hasDefault($key);
-    }
-
-    private function getName(string $key): string
-    {
-        $definition = $this->schema->getDefinition($key);
-
-        return empty($definition)
-            ? ''
-            : $definition['source_name'];
-    }
-
-    private function hasDefault(string $key): bool
-    {
-        return array_key_exists(
-            'default_value',
-            $this->schema->getDefinition($key)
-        );
-    }
-
-    /**
-     * @throws MissingDefaultValue
-     */
-    private function getDefault(string $key)
-    {
-        if (! $this->hasDefault($key)) {
-            throw new MissingDefaultValue("Key: '{$key}'");
-        }
-
-        return $this->schema->getDefinition($key)['default_value'];
+        return $this->reader->hasDefault($key, $this->schema);
     }
 }
