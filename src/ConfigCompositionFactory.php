@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config;
 
+use Inpsyde\Config\Source\Constant;
 use Inpsyde\Config\Source\Environment;
 use Inpsyde\Config\Source\Source;
 use Inpsyde\Config\Source\WpOption;
@@ -64,7 +65,7 @@ class ConfigCompositionFactory
                 return WpOption::asWpSiteoption($schema, $filter);
             },
             Source::SOURCE_CONSTANT => function (Schema $schema, Filter $filter = null) {
-                //Todo: create Constant source
+                return new Constant($schema, $filter);
             },
         ];
     }

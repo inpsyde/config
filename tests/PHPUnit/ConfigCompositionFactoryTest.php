@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config;
 
+use Inpsyde\Config\Source\Constant;
 use Inpsyde\Config\Source\Environment;
 use Inpsyde\Config\Source\Source;
 use Inpsyde\Config\Source\WpOption;
@@ -81,7 +82,13 @@ class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
                     ],
                     'config.siteoption.one' => [
                         'source' => Source::SOURCE_WP_SITEOPTION,
-                    ]
+                    ],
+                    'config.constant.one' => [
+                        'source' => Source::SOURCE_CONSTANT,
+                    ],
+                    'config.constant.two' => [
+                        'source' => Source::SOURCE_CONSTANT,
+                    ],
                 ],
                 'keysBySource' => [
                     Source::SOURCE_ENV => [
@@ -95,6 +102,10 @@ class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
                     ],
                     Source::SOURCE_WP_SITEOPTION => [
                         'config.siteoption.one',
+                    ],
+                    Source::SOURCE_CONSTANT => [
+                        'config.constant.one',
+                        'config.constant.two',
                     ]
                 ],
                 'expectations' => [
@@ -104,6 +115,8 @@ class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
                     'config.option.one' => WpOption::class,
                     'config.option.two' => WpOption::class,
                     'config.siteoption.one' => WpOption::class,
+                    'config.constant.one' => Constant::class,
+                    'config.constant.two' => Constant::class,
                 ],
             ],
         ];
