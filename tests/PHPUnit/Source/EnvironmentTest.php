@@ -5,6 +5,7 @@ namespace Inpsyde\Config\Source;
 
 use Inpsyde\Config\Exception\MissingConfig;
 use Inpsyde\Config\Filter;
+use Inpsyde\Config\Helper\SchemaReader;
 use Inpsyde\Config\Schema;
 use MonkeryTestCase\BrainMonkeyWpTestCase;
 
@@ -16,29 +17,19 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
     /**
      * @dataProvider getData
      */
-    public function testGet(string $key, array $schemaData, $value, callable $filterCb, $expected)
+    public function testGet(string $key, array $definitionForKey, array $mockData, $expected)
     {
-        $filter = \Mockery::mock(Filter::class);
-        $schema = \Mockery::mock(Schema::class);
+        $schema = $this->buildSchemaMock($key, $definitionForKey);
+        $filter = $this->buildFilterMock($mockData, $definitionForKey);
+        $schemaReader = $this->buildSchemaReaderMock($mockData, $key, $schema);
 
-        $schema->shouldReceive('getDefinition')
-            ->with($key)
-            ->andReturn($schemaData[$key]);
-
-        $filter->shouldReceive('validateValue')
-            ->with($value, $schemaData[$key])
-            ->andReturnUsing($filterCb);
-        $filter->shouldReceive('filterValue')
-            ->with($value, $schemaData[$key])
-            ->andReturn($expected);
-
-        if (null !== $value) {
-            $this->putEnv($schemaData[$key]['source_name'], $value);
+        if (null !== $mockData['envName']) {
+            $this->putEnv($mockData['envName'], $mockData['rawValue']);
         }
 
         self::assertSame(
             $expected,
-            (new Environment($schema, $filter))->get($key)
+            (new Environment($schema, $filter, $schemaReader))->get($key)
         );
     }
 
@@ -50,34 +41,71 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
         return [
             'existing value' => [
                 'key' => 'some.config.key',
-                'schema' => [
-                    'some.config.key' => [
-                        'source' => Source::SOURCE_ENV,
-                        'source_name' => 'INPSYDE_CONFIG_TEST',
-                        'filter' => FILTER_VALIDATE_FLOAT,
+                'definitionForKey' => [
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Random Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => '5.5',
+                    'envName' => 'INPSYDE_CONFIG_TEST',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'once',
+                            'return' => 5.5,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'INPSYDE_CONFIG_TEST',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
                     ],
                 ],
-                'value' => '5.5',
-                'filterCb' => function () {
-                    return 5.5;
-                },
-                'expected' =>  5.5,
+                'expected' => 5.5,
             ],
             'not existing value returns default' => [
                 'key' => 'some.config.key',
-                'schema' => [
-                    'some.config.key' => [
-                        'source' => Source::SOURCE_ENV,
-                        'source_name' => 'INPSYDE_CONFIG_TEST',
-                        'default_value' => 10.1,
-                        'filter' => FILTER_VALIDATE_FLOAT,
+                'definitionForKey' => [
+                    'Im Just Random Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => null,
+                    'envName' => null,
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'INPSYDE_CONFIG_TEST',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.1,
+                        ],
                     ],
                 ],
-                'value' => null,
-                'filterCb' => function () {
-                    return false;
-                },
-                'expected' =>  10.1,
+                'expected' => 10.1,
             ],
         ];
     }
@@ -85,28 +113,19 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
     /**
      * @dataProvider hasData
      */
-    public function testHas(string $key, array $schemaData, $value, callable $filterCb, bool $expected)
+    public function testHas(string $key, array $definitionForKey, array $mockData, bool $expected)
     {
-        $filter = \Mockery::mock(Filter::class);
-        $schema = \Mockery::mock(Schema::class);
+        $schema = $this->buildSchemaMock($key, $definitionForKey);
+        $filter = $this->buildFilterMock($mockData, $definitionForKey);
+        $schemaReader = $this->buildSchemaReaderMock($mockData, $key, $schema);
 
-        $schema->shouldReceive('getDefinition')
-            ->atLeast()
-            ->once()
-            ->with($key)
-            ->andReturn($schemaData[$key]);
-
-        $filter->shouldReceive('validateValue')
-            ->with($value, $schemaData[$key])
-            ->andReturnUsing($filterCb);
-
-        if (null !== $value) {
-            $this->putEnv($schemaData[$key]['source_name'], $value);
+        if (null !== $mockData['rawValue']) {
+            $this->putEnv($mockData['envName'], $mockData['rawValue']);
         }
 
         self::assertSame(
             $expected,
-            (new Environment($schema, $filter))->has($key)
+            (new Environment($schema, $filter, $schemaReader))->has($key)
         );
     }
 
@@ -118,66 +137,123 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
         return [
             'existing value' => [
                 'key' => 'some.config.key',
-                'schema' => [
-                    'some.config.key' => [
-                        'source' => Source::SOURCE_ENV,
-                        'source_name' => 'INPSYDE_CONFIG_TEST_A',
-                        'default_value' => 5.5,
-                        'filter' => FILTER_VALIDATE_FLOAT,
+                'definitionForKey' => [
+                    /*
+                    * It doesn't matter how this array looks like as it is only passed through
+                    *  and is expected as parameter for mocks
+                    */
+                    'Im Just Arbitrary Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => '5.5',
+                    'envName' => 'INPSYDE_CONFIG_TEST_A',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'INPSYDE_CONFIG_TEST_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.1,
+                        ],
                     ],
                 ],
-                'value' => '5.5',
-                'filterCb' => function () {
-                    return 5.5;
-                },
-                'expected' =>  true,
+                'expected' => true,
             ],
             'not existing value' => [
                 'key' => 'some.config.key',
-                'schema' => [
-                    'some.config.key' => [
-                        'source' => Source::SOURCE_ENV,
-                        'source_name' => 'INPSYDE_CONFIG_TEST_B',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => null,
+                    'envName' => 'INPSYDE_CONFIG_TEST_B',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'INPSYDE_CONFIG_TEST_B',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
                     ],
                 ],
-                'value' => null,
-                'filterCb' => function () {
-                    return false;
-                },
                 'expected' => false,
             ],
             'not existing value fall back to default' => [
                 'key' => 'some.config.key',
-                'schema' => [
-                    'some.config.key' => [
-                        'source' => Source::SOURCE_ENV,
-                        'source_name' => 'INPSYDE_CONFIG_TEST_C',
-                        'default_value' => 10.5,
-                        'filter' => FILTER_VALIDATE_FLOAT
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around'
+                ],
+                'mockData' => [
+                    'rawValue' => null,
+                    'envName' => 'INPSYDE_CONFIG_TEST_C',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'INPSYDE_CONFIG_TEST_C',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.1,
+                        ],
                     ],
                 ],
-                'value' => null,
-                'filterCb' => function () {
-                    return false;
-                },
                 'expected' => 10.5,
             ],
         ];
     }
 
-    public function testGetThrowsMissingConfigException() {
+    public function testGetThrowsMissingConfigException()
+    {
+        $key = 'what.the.config';
 
         $schema = \Mockery::mock(Schema::class);
         $filter = \Mockery::mock(Filter::class);
-        $key = 'what.the.config';
-
-        $schema->shouldReceive('getDefinition')
-            ->with($key)
-            ->andReturn([]);
+        $schemaReader = \Mockery::mock(
+            SchemaReader::class,
+            [
+                'sourceName' => '',
+            ]
+        );
 
         self::expectException(MissingConfig::class);
 
-        (new Environment($schema,$filter))
+        (new Environment($schema, $filter, $schemaReader))
             ->get($key);
     }
 
@@ -185,6 +261,50 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
     {
         $this->environment[$name] = $value;
         putenv("{$name}={$value}");
+    }
+
+    private function buildSchemaMock(string $key, array $definitionForKey): Schema
+    {
+        $schema = \Mockery::mock(Schema::class);
+        $schema->shouldReceive('getDefinition')
+            ->with($key)
+            ->andReturn($definitionForKey);
+
+        /* @var Schema $schema */
+        return $schema;
+    }
+
+    private function buildFilterMock(array $mockData, array $definitionForKey): Filter
+    {
+        $filter = \Mockery::mock(Filter::class);
+        $filter->shouldReceive('validateValue')
+            ->{$mockData['filter']['validateValue']['expect']}()
+            ->with($mockData['rawValue'], $definitionForKey)
+            ->andReturn($mockData['filter']['validateValue']['return']);
+        $filter->shouldReceive('filterValue')
+            ->{$mockData['filter']['filterValue']['expect']}()
+            ->with($mockData['rawValue'], $definitionForKey)
+            ->andReturn($mockData['filter']['filterValue']['return']);
+
+        /* @var Filter $filter */
+        return $filter;
+    }
+
+    private function buildSchemaReaderMock(array $mockData, string $key, Schema $schema): SchemaReader
+    {
+        $reader = \Mockery::mock(SchemaReader::class);
+        $reader->shouldReceive('sourceName')
+            ->with($key, $schema)
+            ->andReturn($mockData['schemaReader']['sourceName']['return']);
+        $reader->shouldReceive('hasDefault')
+            ->with($key, $schema)
+            ->andReturn($mockData['schemaReader']['hasDefault']['return']);
+        $reader->shouldReceive('defaultValue')
+            ->with($key, $schema)
+            ->andReturn($mockData['schemaReader']['defaultValue']['return']);
+
+        /* @var SchemaReader $reader */
+        return $reader;
     }
 
     protected function tearDown()
