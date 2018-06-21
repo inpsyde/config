@@ -6,6 +6,7 @@ namespace Inpsyde\Config\Source;
 use Brain\Monkey\Functions;
 use Inpsyde\Config\Exception\MissingConfig;
 use Inpsyde\Config\Filter;
+use Inpsyde\Config\Helper\SchemaReader;
 use Inpsyde\Config\Schema;
 use MonkeryTestCase\BrainMonkeyWpTestCase;
 
@@ -15,40 +16,36 @@ class WpOptionTest extends BrainMonkeyWpTestCase
     /**
      * @dataProvider hasData
      */
-    public function testHas(array $data, array $mocks, bool $expected)
+    public function testHas(string $key, array $definitionForKey, array $mockData, bool $expected)
     {
-        $schema = \Mockery::mock(Schema::class);
-        $filter = \Mockery::mock(Filter::class);
+        $filter = $this->buildFilterMock($mockData, $definitionForKey);
+        $schema = $this->buildSchemaMock($key, $definitionForKey);
+        $schemaReader = $this->buildSchemaReaderMock($mockData, $key, $schema);
 
-        $schema->shouldReceive('getDefinition')
-            ->with($data['key'])
-            ->andReturn($data['schema']);
-
-        $filter->shouldReceive('validateValue')
-            ->with($data['value'], $data['schema'])
-            ->andReturn($mocks['filterValidates']);
-
-        $optionLoader = function ($optionName, $default) use ($data) {
+        $optionLoader = function ($optionName, $default) use ($mockData) {
             self::assertSame(
                 $optionName,
-                $data['schema']['source_name']
+                $mockData['schemaReader']['sourceName']['return']
             );
-            if (array_key_exists('default_value', $data['schema'])) {
+            if ($mockData['schemaReader']['hasDefault']['return']) {
                 self::assertSame(
-                    $data['schema']['default_value'],
+                    $mockData['schemaReader']['defaultValue']['return'],
                     $default
                 );
             } else {
                 self::assertFalse($default);
             }
 
-            return $data['value'];
+            // wp_option returns 'false' if there is no value
+            return null === $mockData['rawValue']
+                ? false
+                : $mockData['rawValue'];
         };
 
-        $testee = new WpOption($optionLoader, $schema, $filter);
+        $testee = new WpOption($optionLoader, $schema, $filter, $schemaReader);
         self::assertSame(
             $expected,
-            $testee->has($data['key'])
+            $testee->has($key)
         );
     }
 
@@ -58,80 +55,193 @@ class WpOptionTest extends BrainMonkeyWpTestCase
     public function hasData(): array
     {
         return [
-            'existing valid value' => [
-                'data' => [
-                    'key' => 'some.config.key',
-                    'schema' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                        'source_name' => '_option_name',
-                        'filter' => FILTER_VALIDATE_INT,
-                        'default_value' => 10,
-                    ],
-                    'value' => '10',
+            'existing value with default' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Arbitrary Data That Gets Passed Around',
                 ],
-                'mocks' => [
-                    'filterValidates' => true,
+                'mockData' => [
+                    'rawValue' => '10',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => '_option_name',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 11,
+                        ],
+                    ],
                 ],
                 'expected' => true,
             ],
-            'existing valid value without default and filter' => [
-                'data' => [
-                    'key' => 'some.config.key',
-                    'schema' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                        'source_name' => '_option_name',
-                    ],
-                    'value' => '10',
+            'existing value without default' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
                 ],
-                'mocks' => [
-                    'filterValidates' => true,
+                'mockData' => [
+                    'rawValue' => '10',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => '_option_name',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
+                    ],
                 ],
                 'expected' => true,
+            ],
+            'existing invalid value without default' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => 'foo',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => false,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => '_option_name',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
+                    ],
+                ],
+                'expected' => false,
             ],
             'invalid value does not fall back to default value' => [
-                'data' => [
-                    'key' => 'some.config.key',
-                    'schema' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                        'source_name' => '_option_name',
-                        'default_value' => 10,
-                        'filter' => FILTER_VALIDATE_INT,
-                    ],
-                    'value' => 'NAN',
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
                 ],
-                'mocks' => [
-                    'filterValidates' => false,
+                'mockData' => [
+                    'rawValue' => 'foo',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => false,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => '_option_name',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10,
+                        ],
+                    ],
                 ],
                 'expected' => false,
             ],
             'not existing value falls back to default value' => [
-                'data' => [
-                    'key' => 'some.config.key',
-                    'schema' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                        'source_name' => '_option_name',
-                        'default_value' => 10,
-                        'filter' => FILTER_VALIDATE_INT,
-                    ],
-                    'value' => null,
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
                 ],
-                'mocks' => [
-                    'filterValidates' => true,
+                'mockData' => [
+                    'rawValue' => null,
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => '_option_name',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10,
+                        ],
+                    ],
                 ],
                 'expected' => true,
             ],
             'not existing value' => [
-                'data' => [
-                    'key' => 'some.config.key',
-                    'schema' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                        'source_name' => '_option_name',
-
-                    ],
-                    'value' => null,
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
                 ],
-                'mocks' => [
-                    'filterValidates' => false,
+                'mockData' => [
+                    'rawValue' => null,
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => true,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => '_option_name',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
+                    ],
                 ],
                 'expected' => false,
             ],
@@ -141,46 +251,28 @@ class WpOptionTest extends BrainMonkeyWpTestCase
     /**
      * @dataProvider getData
      */
-    public function testGet(array $data, array $mocks, $expected)
+    public function testGet(string $key, array $definitionForKey, array $mockData, $expected)
     {
-        $schema = \Mockery::mock(Schema::class);
-        $filter = \Mockery::mock(Filter::class);
+        $filter = $this->buildFilterMock($mockData, $definitionForKey);
+        $schema = $this->buildSchemaMock($key, $definitionForKey);
+        $schemaReader = $this->buildSchemaReaderMock($mockData, $key, $schema);
 
-        $schema->shouldReceive('getDefinition')
-            ->with($data['key'])
-            ->andReturn($data['schema']);
-
-        if (null !== $mocks['filterValidates']) {
-            $filter->shouldReceive('validateValue')
-                ->with($data['value'], $data['schema'])
-                ->andReturn($mocks['filterValidates']);
-        }
-
-        if (null !== $mocks['filteredValue']) {
-            $filter->shouldReceive('filterValue')
-                ->with($data['value'], $data['schema'])
-                ->andReturn($mocks['filteredValue']);
-        }
-
-        $optionLoader = function ($optionName, $default = false) use ($data) {
+        $optionLoader = function ($optionName) use ($mockData) {
             self::assertSame(
                 $optionName,
-                $data['schema']['source_name']
+                $mockData['schemaReader']['sourceName']['return']
             );
-            if (false !== $default && array_key_exists('default_value', $data['schema'])) {
-                self::assertSame(
-                    $data['schema']['default_value'],
-                    $default
-                );
-            }
 
-            return $data['value'] ?? $default;
+            // wp_option returns 'false' if there is no value
+            return null === $mockData['rawValue']
+                ? false
+                : $mockData['rawValue'];
         };
 
-        $testee = new WpOption($optionLoader, $schema, $filter);
+        $testee = new WpOption($optionLoader, $schema, $filter, $schemaReader);
         self::assertSame(
             $expected,
-            $testee->get($data['key'])
+            $testee->get($key)
         );
     }
 
@@ -190,54 +282,102 @@ class WpOptionTest extends BrainMonkeyWpTestCase
     public function getData(): array
     {
         return [
-            'existing valid value' => [
-                'data' => [
-                    'key' => 'some.config.key',
-                    'schema' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                        'source_name' => '_option_name',
-                        'filter' => FILTER_VALIDATE_INT,
-                        'default_value' => 10,
-                    ],
-                    'value' => '10',
+            'existing value with default' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Arbitrary Data That Gets Passed Around',
                 ],
-                'mocks' => [
-                    'filterValidates' => true,
-                    'filteredValue' => 10,
+                'mockData' => [
+                    'rawValue' => '10',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'once',
+                            'return' => 10,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => '_option_name',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 9,
+                        ],
+                    ],
                 ],
                 'expected' => 10,
             ],
-            'existing valid value without default and filter' => [
-                'data' => [
-                    'key' => 'some.config.key',
-                    'schema' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                        'source_name' => '_option_name',
+            'existing value without default' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => '10.01',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'once',
+                            'return' => 10.01,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
                     ],
-                    'value' => '10',
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => '_option_name',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
+                    ],
                 ],
-                'mocks' => [
-                    'filterValidates' => true,
-                    'filteredValue' => 10,
-                ],
-                'expected' => 10,
+                'expected' => 10.01,
             ],
-            'not existing value falls back to default value' => [
-                'data' => [
-                    'key' => 'some.config.key',
-                    'schema' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                        'source_name' => '_option_name',
-                        'default_value' => 10.0,
-                        'filter' => FILTER_VALIDATE_FLOAT,
+            'not existing value returns default' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => null,
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
                     ],
-                    'value' => null,
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => '_option_name',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 9.0,
+                        ],
+                    ],
                 ],
-                'mocks' => [
-                    'filterValidates' => null,
-                    'filteredValue' => null,
-                ],
-                'expected' => 10.0,
+                'expected' => 9.0,
             ],
         ];
     }
@@ -333,5 +473,49 @@ class WpOptionTest extends BrainMonkeyWpTestCase
             $expected,
             (WpOption::asWpSiteoption($schema, $filter))->get($key)
         );
+    }
+
+    private function buildSchemaMock(string $key, array $definitionForKey): Schema
+    {
+        $schema = \Mockery::mock(Schema::class);
+        $schema->shouldReceive('getDefinition')
+            ->with($key)
+            ->andReturn($definitionForKey);
+
+        /* @var Schema $schema */
+        return $schema;
+    }
+
+    private function buildFilterMock(array $mockData, array $definitionForKey): Filter
+    {
+        $filter = \Mockery::mock(Filter::class);
+        $filter->shouldReceive('validateValue')
+            ->{$mockData['filter']['validateValue']['expect']}()
+            ->with($mockData['rawValue'], $definitionForKey)
+            ->andReturn($mockData['filter']['validateValue']['return']);
+        $filter->shouldReceive('filterValue')
+            ->{$mockData['filter']['filterValue']['expect']}()
+            ->with($mockData['rawValue'], $definitionForKey)
+            ->andReturn($mockData['filter']['filterValue']['return']);
+
+        /* @var Filter $filter */
+        return $filter;
+    }
+
+    private function buildSchemaReaderMock(array $mockData, string $key, Schema $schema): SchemaReader
+    {
+        $reader = \Mockery::mock(SchemaReader::class);
+        $reader->shouldReceive('sourceName')
+            ->with($key, $schema)
+            ->andReturn($mockData['schemaReader']['sourceName']['return']);
+        $reader->shouldReceive('hasDefault')
+            ->with($key, $schema)
+            ->andReturn($mockData['schemaReader']['hasDefault']['return']);
+        $reader->shouldReceive('defaultValue')
+            ->with($key, $schema)
+            ->andReturn($mockData['schemaReader']['defaultValue']['return']);
+
+        /* @var SchemaReader $reader */
+        return $reader;
     }
 }

@@ -77,13 +77,14 @@ final class WpOption implements Source
             return false;
         }
 
-        $defaultValue = $this->reader->hasDefault($key, $this->schema)
+        $hasDefault = $this->reader->hasDefault($key, $this->schema);
+        $defaultValue = $hasDefault
             ? $this->reader->defaultValue($key, $this->schema)
             : false;
 
         $value = ($this->optionLoader)($name, $defaultValue);
 
-        if ($value === $defaultValue) {
+        if (false !== $value && $value === $defaultValue || false === $value && $hasDefault) {
             return true;
         }
 
@@ -92,7 +93,7 @@ final class WpOption implements Source
             : false;
     }
 
-    public static function asWpOption(Schema $schema, Filter $filter = null): self
+    public static function asWpOption(Schema $schema, Filter $filter = null, SchemaReader $reader = null): self
     {
         $filter or $filter = new Filter();
 
@@ -101,11 +102,12 @@ final class WpOption implements Source
                 return get_option($optionName, $defaultValue);
             },
             $schema,
-            $filter
+            $filter,
+            $reader
         );
     }
 
-    public static function asWpSiteoption(Schema $schema, Filter $filter = null): self
+    public static function asWpSiteoption(Schema $schema, Filter $filter = null, SchemaReader $reader = null): self
     {
         $filter or $filter = new Filter();
 
@@ -114,7 +116,8 @@ final class WpOption implements Source
                 return get_site_option($optionName, $defaultValue);
             },
             $schema,
-            $filter
+            $filter,
+            $reader
         );
     }
 }
