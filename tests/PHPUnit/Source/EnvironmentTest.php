@@ -39,7 +39,43 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
     public function getData(): array
     {
         return [
-            'existing value' => [
+            'existing value with default' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Random Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => '5.5',
+                    'envName' => 'INPSYDE_CONFIG_TEST',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'once',
+                            'return' => 5.5,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'INPSYDE_CONFIG_TEST',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.01,
+                        ],
+                    ],
+                ],
+                'expected' => 5.5,
+            ],
+            'existing value without default' => [
                 'key' => 'some.config.key',
                 'definitionForKey' => [
                     /*
@@ -135,7 +171,7 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
     public function hasData(): array
     {
         return [
-            'existing value' => [
+            'existing value with default' => [
                 'key' => 'some.config.key',
                 'definitionForKey' => [
                     /*
@@ -171,7 +207,7 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
                 ],
                 'expected' => true,
             ],
-            'not existing value' => [
+            'existing value without default' => [
                 'key' => 'some.config.key',
                 'definitionForKey' => [
                     'Im Just Arbitrary Data That Gets Passed Around',
@@ -194,6 +230,38 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
                             'return' => 'INPSYDE_CONFIG_TEST_B',
                         ],
                         'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.01,
+                        ],
+                    ],
+                ],
+                'expected' => true,
+            ],
+            'existing invalid value without default' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => 'foo',
+                    'envName' => 'INPSYDE_CONFIG_TEST_B',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => false,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'INPSYDE_CONFIG_TEST_B',
+                        ],
+                        'hasDefault' => [
                             'return' => false,
                         ],
                         'defaultValue' => [
@@ -203,7 +271,39 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
                 ],
                 'expected' => false,
             ],
-            'not existing value fall back to default' => [
+            'invalid value does not fall back to default value' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => 'foo',
+                    'envName' => 'INPSYDE_CONFIG_TEST_B',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => false,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'INPSYDE_CONFIG_TEST_B',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.01,
+                        ],
+                    ],
+                ],
+                'expected' => false,
+            ],
+            'not existing value fall back to default value' => [
                 'key' => 'some.config.key',
                 'definitionForKey' => [
                     'Im Just Arbitrary Data That Gets Passed Around'
@@ -233,7 +333,39 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
                         ],
                     ],
                 ],
-                'expected' => 10.5,
+                'expected' => true,
+            ],
+            'not existing value without default' => [
+                'key' => 'some.config.key',
+                'definitionForKey' => [
+                    'Im Just Arbitrary Data That Gets Passed Around'
+                ],
+                'mockData' => [
+                    'rawValue' => null,
+                    'envName' => 'INPSYDE_CONFIG_TEST_C',
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'INPSYDE_CONFIG_TEST_C',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
+                    ],
+                ],
+                'expected' => false,
             ],
         ];
     }
