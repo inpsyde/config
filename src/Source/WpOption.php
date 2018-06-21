@@ -107,7 +107,7 @@ final class WpOption implements Source
         );
     }
 
-    public static function asWpSiteoption(Schema $schema, Filter $filter = null, SchemaReader $reader = null): self
+    public static function asWpSiteOption(Schema $schema, Filter $filter = null, SchemaReader $reader = null): self
     {
         $filter or $filter = new Filter();
 

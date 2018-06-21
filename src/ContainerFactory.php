@@ -62,7 +62,7 @@ class ContainerFactory
                 return WpOption::asWpOption($schema, $filter);
             },
             Source::SOURCE_WP_SITEOPTION => function (Schema $schema, Filter $filter = null) {
-                return WpOption::asWpSiteoption($schema, $filter);
+                return WpOption::asWpSiteOption($schema, $filter);
             },
             Source::SOURCE_CONSTANT => function (Schema $schema, Filter $filter = null) {
                 return new Constant($schema, $filter);

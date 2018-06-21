@@ -471,7 +471,7 @@ class WpOptionTest extends BrainMonkeyWpTestCase
 
         self::assertSame(
             $expected,
-            (WpOption::asWpSiteoption($schema, $filter))->get($key)
+            (WpOption::asWpSiteOption($schema, $filter))->get($key)
         );
     }
 
