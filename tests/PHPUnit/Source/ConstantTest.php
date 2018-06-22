@@ -5,6 +5,7 @@ namespace Inpsyde\Config\Source;
 
 use Inpsyde\Config\Exception\MissingConfig;
 use Inpsyde\Config\Filter;
+use Inpsyde\Config\Helper\SchemaReader;
 use Inpsyde\Config\Schema;
 use MonkeryTestCase\BrainMonkeyWpTestCase;
 
@@ -17,25 +18,19 @@ class ConstantTest extends BrainMonkeyWpTestCase
     /**
      * @dataProvider hasData
      */
-    public function testHas(array $definition, string $key, array $mockData, bool $expected)
+    public function testHas(string $key, array $definitionForKey, array $mockData, bool $expected)
     {
-        $schema = \Mockery::mock(Schema::class);
-        $schema->shouldReceive('getDefinition')
-            ->with($key)
-            ->andReturn($definition[$key]);
+        $filter = $this->buildFilterMock($mockData, $definitionForKey);
+        $schema = $this->buildSchemaMock($key, $definitionForKey);
+        $schemaReader = $this->buildSchemaReaderMock($mockData, $key, $schema);
 
-        $filter = \Mockery::mock(Filter::class);
-        $filter->shouldReceive('validateValue')
-            ->with($mockData['value'], $definition[$key])
-            ->andReturn($mockData['filter']['return']);
-
-        if ($mockData['constant']['define']) {
-            define($definition[$key]['source_name'], $mockData['value']);
+        if (null !== $mockData['rawValue']) {
+            define($mockData['schemaReader']['sourceName']['return'], $mockData['rawValue']);
         }
 
         self::assertSame(
             $expected,
-            (new Constant($schema, $filter))->has($key)
+            (new Constant($schema, $filter, $schemaReader))->has($key)
         );
     }
 
@@ -45,76 +40,212 @@ class ConstantTest extends BrainMonkeyWpTestCase
     public function hasData(): array
     {
         return [
-            'defined expects true' => [
-                'definition' => [
-                    'some.constant.config' => [
-                        'source_name' => 'CONSTANT_A',
-                    ],
-                ],
+            'existing value with default' => [
                 'key' => 'some.constant.config',
+                'definition' => [
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Random Data That Gets Passed Around',
+                ],
                 'mockData' => [
-                    'value' => 10,
+                    'rawValue' => 'https://some.url',
                     'filter' => [
-                        'return' => true,
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
                     ],
-                    'constant' => [
-                        'define' => true,
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'CONSTANT_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 'https://default.url',
+                        ],
                     ],
                 ],
                 'expected' => true,
             ],
-            'not defined expects false' => [
+            'existing value without default' => [
+                'key' => 'some.constant.config',
                 'definition' => [
-                    'some.constant.config' => [
-                        'source_name' => 'CONSTANT_A',
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Random Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => 'https://some.url',
+                    'filter' => [
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'CONSTANT_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
                     ],
                 ],
+                'expected' => true,
+            ],
+            'existing invalid value without default' => [
                 'key' => 'some.constant.config',
+                'definition' => [
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Random Data That Gets Passed Around',
+                ],
                 'mockData' => [
-                    'value' => null,
+                    'rawValue' => 'not-a-valid-number',
                     'filter' => [
-                        'return' => null,
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => false,
+                        ],
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
                     ],
-                    'constant' => [
-                        'define' => false,
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'CONSTANT_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
                     ],
                 ],
                 'expected' => false,
             ],
-            'not defined default value expects true' => [
+            'invalid value does not fall back to default' => [
+                'key' => 'some.constant.config',
                 'definition' => [
-                    'some.constant.config' => [
-                        'source_name' => 'CONSTANT_A',
-                        'default_value' => 10,
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Random Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => 'not-a-valid-number',
+                    'filter' => [
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => false,
+                        ],
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'CONSTANT_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10,
+                        ],
                     ],
                 ],
+                'expected' => false,
+            ],
+            'not existing value falls back to default' => [
                 'key' => 'some.constant.config',
+                'definition' => [
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Random Data That Gets Passed Around',
+                ],
                 'mockData' => [
-                    'value' => null,
+                    'rawValue' => null,
                     'filter' => [
-                        'return' => null,
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
                     ],
-                    'constant' => [
-                        'define' => false,
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'CONSTANT_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10,
+                        ],
                     ],
                 ],
                 'expected' => true,
             ],
-            'defined invalid expects false' => [
-                'definition' => [
-                    'some.constant.config' => [
-                        'source_name' => 'CONSTANT_A',
-                        'default_value' => 10,
-                    ],
-                ],
+            'not existing value without default' => [
                 'key' => 'some.constant.config',
+                'definition' => [
+                    /*
+                     * It doesn't matter how this array looks like as it is only passed through
+                     *  and is expected as parameter for mocks
+                     */
+                    'Im Just Random Data That Gets Passed Around',
+                ],
                 'mockData' => [
-                    'value' => 0,
+                    'rawValue' => null,
                     'filter' => [
-                        'return' => false,
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
                     ],
-                    'constant' => [
-                        'define' => true,
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'CONSTANT_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
                     ],
                 ],
                 'expected' => false,
@@ -125,30 +256,19 @@ class ConstantTest extends BrainMonkeyWpTestCase
     /**
      * @dataProvider getData
      */
-    public function testGet(array $definition, string $key, array $mockData, $expected)
+    public function testGet(string $key, array $definitionForKey, array $mockData, $expected)
     {
-        $schema = \Mockery::mock(Schema::class);
-        $schema->shouldReceive('getDefinition')
-            ->with($key)
-            ->andReturn($definition[$key]);
+        $filter = $this->buildFilterMock($mockData, $definitionForKey);
+        $schema = $this->buildSchemaMock($key, $definitionForKey);
+        $schemaReader = $this->buildSchemaReaderMock($mockData, $key, $schema);
 
-        $filter = \Mockery::mock(Filter::class);
-        $filter->shouldReceive('validateValue')
-            ->{$mockData['filter']['validate']['expected']}()
-            ->with($mockData['value'], $definition[$key])
-            ->andReturn($mockData['filter']['validate']['return']);
-        $filter->shouldReceive('filterValue')
-            ->{$mockData['filter']['filter']['expected']}()
-            ->with($mockData['value'], $definition[$key])
-            ->andReturn($mockData['filter']['filter']['return']);
-
-        if ($mockData['constant']['define']) {
-            define($definition[$key]['source_name'], $mockData['value']);
+        if (null !== $mockData['rawValue']) {
+            define($mockData['schemaReader']['sourceName']['return'], $mockData['rawValue']);
         }
 
         self::assertSame(
             $expected,
-            (new Constant($schema, $filter))->get($key)
+            (new Constant($schema, $filter, $schemaReader))->get($key)
         );
     }
 
@@ -158,56 +278,102 @@ class ConstantTest extends BrainMonkeyWpTestCase
     public function getData(): array
     {
         return [
-            'defined expects value' => [
-                'definition' => [
-                    'some.constant.config' => [
-                        'source_name' => 'CONSTANT_A',
-                    ],
-                ],
+            'existing value with default' => [
                 'key' => 'some.constant.config',
+                'definitionForKey' => [
+                    /*
+                    * It doesn't matter how this array looks like as it is only passed through
+                    *  and is expected as parameter for mocks
+                    */
+                    'Im Just Random Data That Gets Passed Around',
+                ],
                 'mockData' => [
-                    'value' => 10,
+                    'rawValue' => '10',
                     'filter' => [
-                        'validate' => [
-                            'expected' => 'once',
+                        'validateValue' => [
+                            'expect' => 'once',
                             'return' => true,
                         ],
-                        'filter' => [
-                            'expected' => 'once',
+                        'filterValue' => [
+                            'expect' => 'once',
                             'return' => 10,
                         ],
                     ],
-                    'constant' => [
-                        'define' => true,
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'CONSTANT_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 5,
+                        ],
                     ],
                 ],
                 'expected' => 10,
             ],
-            'not defined expects default' => [
-                'definition' => [
-                    'some.constant.config' => [
-                        'source_name' => 'CONSTANT_A',
-                        'default_value' => "http://some.url",
-                    ],
-                ],
+            'existing value without default' => [
                 'key' => 'some.constant.config',
+                'definition' => [
+                    'Im Just Random Data That Gets Passed Around',
+                ],
                 'mockData' => [
-                    'value' => null,
+                    'rawValue' => 'http://some.url',
                     'filter' => [
-                        'validate' => [
-                            'expected' => 'never',
-                            'return' => null,
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
                         ],
-                        'filter' => [
-                            'expected' => 'never',
-                            'return' => null,
+                        'filterValue' => [
+                            'expect' => 'once',
+                            'return' => 'http://some.url',
                         ],
                     ],
-                    'constant' => [
-                        'define' => false,
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'CONSTANT_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
                     ],
                 ],
                 'expected' => "http://some.url",
+            ],
+            'not existing value with default' => [
+                'key' => 'some.constant.config',
+                'definition' => [
+                    'Im Just Random Data That Gets Passed Around',
+                ],
+                'mockData' => [
+                    'rawValue' => null,
+                    'filter' => [
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'sourceName' => [
+                            'return' => 'CONSTANT_A',
+                        ],
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.01,
+                        ],
+                    ],
+                ],
+                'expected' => 10.01,
             ],
         ];
     }
@@ -217,12 +383,56 @@ class ConstantTest extends BrainMonkeyWpTestCase
         $schema = \Mockery::mock(
             Schema::class,
             [
-                'getDefinition' => []
+                'getDefinition' => [],
             ]
         );
         self::expectException(MissingConfig::class);
 
         (new Constant($schema))
             ->get('not.me');
+    }
+
+    private function buildSchemaMock(string $key, array $definitionForKey): Schema
+    {
+        $schema = \Mockery::mock(Schema::class);
+        $schema->shouldReceive('getDefinition')
+            ->with($key)
+            ->andReturn($definitionForKey);
+
+        /* @var Schema $schema */
+        return $schema;
+    }
+
+    private function buildFilterMock(array $mockData, array $definitionForKey): Filter
+    {
+        $filter = \Mockery::mock(Filter::class);
+        $filter->shouldReceive('validateValue')
+            ->{$mockData['filter']['validateValue']['expect']}()
+            ->with($mockData['rawValue'], $definitionForKey)
+            ->andReturn($mockData['filter']['validateValue']['return']);
+        $filter->shouldReceive('filterValue')
+            ->{$mockData['filter']['filterValue']['expect']}()
+            ->with($mockData['rawValue'], $definitionForKey)
+            ->andReturn($mockData['filter']['filterValue']['return']);
+
+        /* @var Filter $filter */
+        return $filter;
+    }
+
+    private function buildSchemaReaderMock(array $mockData, string $key, Schema $schema): SchemaReader
+    {
+        $reader = \Mockery::mock(SchemaReader::class);
+        $reader->shouldReceive('sourceName')
+            ->with($key, $schema)
+            ->andReturn($mockData['schemaReader']['sourceName']['return']);
+        $reader->shouldReceive('hasDefault')
+            ->with($key, $schema)
+            ->andReturn($mockData['schemaReader']['hasDefault']['return']);
+        $reader->shouldReceive('defaultValue')
+            ->with($key, $schema)
+            ->andReturn($mockData['schemaReader']['defaultValue']['return']);
+
+        /* @var SchemaReader $reader */
+        return $reader;
     }
 }
