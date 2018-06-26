@@ -9,7 +9,7 @@
 	>
 	<testsuites>
 		<testsuite name="Config PHP unit tests">
-			<directory suffix="Test.php">./tests/PHPUnit</directory>
+			<directory suffix="Test.php">./tests/unit-tests/testcases</directory>
 		</testsuite>
 	</testsuites>
 </phpunit>
