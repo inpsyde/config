@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config\Exception;
 
-class MissingValue extends RuntimeException
+class RuntimeException extends \RuntimeException implements Exception
 {
 
 }
