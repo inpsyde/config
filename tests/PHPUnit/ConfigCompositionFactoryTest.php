@@ -6,6 +6,7 @@ namespace Inpsyde\Config;
 use Inpsyde\Config\Source\Constant;
 use Inpsyde\Config\Source\Environment;
 use Inpsyde\Config\Source\Source;
+use Inpsyde\Config\Source\Variable;
 use Inpsyde\Config\Source\WpOption;
 use MonkeryTestCase\BrainMonkeyWpTestCase;
 
@@ -17,6 +18,7 @@ class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
      */
     public function testBuildSourcesList(
         array $definition,
+        array $variabelConfig,
         array $keysBySource,
         array $expectations
     ) {
@@ -37,7 +39,7 @@ class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
             ->andReturn($schema);
 
         $testee = new ContainerFactory($schemaValidator);
-        $sourceList = $testee->buildSourcesList($definition);
+        $sourceList = $testee->buildSourcesList($definition, $variabelConfig);
 
         self::assertEquals(
             array_keys($expectations),
@@ -89,6 +91,12 @@ class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
                     'config.constant.two' => [
                         'source' => Source::SOURCE_CONSTANT,
                     ],
+                    'config.variable.one' => [
+                        'source' => Source::SOURCE_VARIABLE,
+                    ],
+                ],
+                'variableConfig' => [
+                    'config.variable.one' => true,
                 ],
                 'keysBySource' => [
                     Source::SOURCE_ENV => [
@@ -106,6 +114,9 @@ class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
                     Source::SOURCE_CONSTANT => [
                         'config.constant.one',
                         'config.constant.two',
+                    ],
+                    Source::SOURCE_VARIABLE => [
+                        'config.variable.one',
                     ]
                 ],
                 'expectations' => [
@@ -117,6 +128,7 @@ class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
                     'config.siteoption.one' => WpOption::class,
                     'config.constant.one' => Constant::class,
                     'config.constant.two' => Constant::class,
+                    'config.variable.one' => Variable::class,
                 ],
             ],
         ];
