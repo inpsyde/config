@@ -12,4 +12,5 @@ interface Source extends Config
     const SOURCE_WP_OPTION = 'wp_option';
     const SOURCE_WP_SITEOPTION = 'wp_siteoption';
     const SOURCE_CONSTANT = 'constant';
+    const SOURCE_VARIABLE = 'variable';
 }

@@ -4,32 +4,255 @@ declare(strict_types=1);
 namespace Inpsyde\Config\Source;
 
 use Inpsyde\Config\Exception\MissingConfig;
+use Inpsyde\Config\Exception\MissingValue;
 use Inpsyde\Config\Filter;
 use Inpsyde\Config\Helper\SchemaReader;
 use Inpsyde\Config\Schema;
 use MonkeryTestCase\BrainMonkeyWpTestCase;
 
-class EnvironmentTest extends BrainMonkeyWpTestCase
+class VariableTest extends BrainMonkeyWpTestCase
 {
 
-    private $environment = [];
+    /**
+     * @dataProvider hasData
+     */
+    public function testHas(string $key, array $mockData, bool $expected)
+    {
+        /**
+         * It doesn't matter how this array looks like as it is only passed through
+         *  and is expected as parameter for mocks
+         */
+        $definitionForKey = ['just arbitrary data', 'really'];
+        $filter = $this->buildFilterMock($mockData, $definitionForKey);
+        $schema = $this->buildSchemaMock($key, $definitionForKey, $mockData);
+        $schemaReader = $this->buildSchemaReaderMock($mockData, $key, $schema);
+
+        self::assertSame(
+            $expected,
+            (new Variable($schema, $mockData['config'], $filter, $schemaReader))->has($key)
+        );
+    }
+
+    /**
+     * @see testHas
+     */
+    public function hasData(): array
+    {
+        return [
+            'existing value with default' => [
+                'key' => 'some.config.key',
+                'mockData' => [
+                    'rawValue' => '5.5',
+                    'config' => [
+                        'some.config.key' => '5.5',
+                    ],
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                    ],
+                    'schema' => [
+                        'getKeys' => [
+                            'return' => ['some.config.key'],
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.1,
+                        ],
+                    ],
+                ],
+                'expected' => true,
+            ],
+            'existing value without default' => [
+                'key' => 'some.config.key',
+                'mockData' => [
+                    'rawValue' => '5.5',
+                    'config' => [
+                        'some.config.key' => '5.5',
+                    ],
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => true,
+                        ],
+                    ],
+                    'schema' => [
+                        'getKeys' => [
+                            'return' => ['some.config.key'],
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
+                    ],
+                ],
+                'expected' => true,
+            ],
+            'existing invalid value without default' => [
+                'key' => 'some.config.key',
+                'mockData' => [
+                    'rawValue' => 'foo',
+                    'config' => [
+                        'some.config.key' => 'foo',
+                    ],
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => false,
+                        ],
+                    ],
+                    'schema' => [
+                        'getKeys' => [
+                            'return' => ['some.config.key'],
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
+                    ],
+                ],
+                'expected' => false,
+            ],
+            'invalid value does not fall back to default value' => [
+                'key' => 'some.config.key',
+                'mockData' => [
+                    'rawValue' => 'foo',
+                    'config' => [
+                        'some.config.key' => 'foo',
+                    ],
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'once',
+                            'return' => false,
+                        ],
+                    ],
+                    'schema' => [
+                        'getKeys' => [
+                            'return' => ['some.config.key'],
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.01,
+                        ],
+                    ],
+                ],
+                'expected' => false,
+            ],
+            'not existing value fall back to default value' => [
+                'key' => 'some.config.key',
+                'mockData' => [
+                    'rawValue' => null,
+                    'config' => [],
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schema' => [
+                        'getKeys' => [
+                            'return' => [],
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'hasDefault' => [
+                            'return' => true,
+                        ],
+                        'defaultValue' => [
+                            'return' => 10.1,
+                        ],
+                    ],
+                ],
+                'expected' => true,
+            ],
+            'not existing value without default' => [
+                'key' => 'some.config.key',
+                'mockData' => [
+                    'rawValue' => null,
+                    'config' => [],
+                    'filter' => [
+                        'filterValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                        'validateValue' => [
+                            'expect' => 'never',
+                            'return' => null,
+                        ],
+                    ],
+                    'schema' => [
+                        'getKeys' => [
+                            'return' => [],
+                        ],
+                    ],
+                    'schemaReader' => [
+                        'hasDefault' => [
+                            'return' => false,
+                        ],
+                        'defaultValue' => [
+                            'return' => null,
+                        ],
+                    ],
+                ],
+                'expected' => false,
+            ],
+        ];
+    }
 
     /**
      * @dataProvider getData
      */
-    public function testGet(string $key, array $definitionForKey, array $mockData, $expected)
+    public function testGet(string $key, array $mockData, $expected)
     {
-        $schema = $this->buildSchemaMock($key, $definitionForKey);
+        /**
+         * It doesn't matter how this array looks like as it is only passed through
+         *  and is expected as parameter for mocks
+         */
+        $definitionForKey = ['just arbitrary data', 'really'];
         $filter = $this->buildFilterMock($mockData, $definitionForKey);
+        $schema = $this->buildSchemaMock($key, $definitionForKey, $mockData);
         $schemaReader = $this->buildSchemaReaderMock($mockData, $key, $schema);
-
-        if (null !== $mockData['envName']) {
-            $this->putEnv($mockData['envName'], $mockData['rawValue']);
-        }
 
         self::assertSame(
             $expected,
-            (new Environment($schema, $filter, $schemaReader))->get($key)
+            (new Variable($schema, $mockData['config'], $filter, $schemaReader))->get($key)
         );
     }
 
@@ -41,16 +264,11 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
         return [
             'existing value with default' => [
                 'key' => 'some.config.key',
-                'definitionForKey' => [
-                    /*
-                     * It doesn't matter how this array looks like as it is only passed through
-                     *  and is expected as parameter for mocks
-                     */
-                    'Im Just Random Data That Gets Passed Around',
-                ],
                 'mockData' => [
                     'rawValue' => '5.5',
-                    'envName' => 'INPSYDE_CONFIG_TEST',
+                    'config' => [
+                        'some.config.key' => '5.5',
+                    ],
                     'filter' => [
                         'filterValue' => [
                             'expect' => 'once',
@@ -61,10 +279,12 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
                             'return' => true,
                         ],
                     ],
-                    'schemaReader' => [
-                        'sourceName' => [
-                            'return' => 'INPSYDE_CONFIG_TEST',
+                    'schema' => [
+                        'getKeys' => [
+                            'return' => ['some.config.key'],
                         ],
+                    ],
+                    'schemaReader' => [
                         'hasDefault' => [
                             'return' => true,
                         ],
@@ -77,16 +297,11 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
             ],
             'existing value without default' => [
                 'key' => 'some.config.key',
-                'definitionForKey' => [
-                    /*
-                     * It doesn't matter how this array looks like as it is only passed through
-                     *  and is expected as parameter for mocks
-                     */
-                    'Im Just Random Data That Gets Passed Around',
-                ],
                 'mockData' => [
                     'rawValue' => '5.5',
-                    'envName' => 'INPSYDE_CONFIG_TEST',
+                    'config' => [
+                        'some.config.key' => '5.5',
+                    ],
                     'filter' => [
                         'filterValue' => [
                             'expect' => 'once',
@@ -97,10 +312,12 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
                             'return' => true,
                         ],
                     ],
-                    'schemaReader' => [
-                        'sourceName' => [
-                            'return' => 'INPSYDE_CONFIG_TEST',
+                    'schema' => [
+                        'getKeys' => [
+                            'return' => ['some.config.key'],
                         ],
+                    ],
+                    'schemaReader' => [
                         'hasDefault' => [
                             'return' => false,
                         ],
@@ -113,12 +330,9 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
             ],
             'not existing value returns default' => [
                 'key' => 'some.config.key',
-                'definitionForKey' => [
-                    'Im Just Random Data That Gets Passed Around',
-                ],
                 'mockData' => [
                     'rawValue' => null,
-                    'envName' => null,
+                    'config' => [],
                     'filter' => [
                         'filterValue' => [
                             'expect' => 'never',
@@ -129,10 +343,12 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
                             'return' => null,
                         ],
                     ],
-                    'schemaReader' => [
-                        'sourceName' => [
-                            'return' => 'INPSYDE_CONFIG_TEST',
+                    'schema' => [
+                        'getKeys' => [
+                            'return' => ['some.config.key'],
                         ],
+                    ],
+                    'schemaReader' => [
                         'hasDefault' => [
                             'return' => true,
                         ],
@@ -146,262 +362,83 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
         ];
     }
 
-    /**
-     * @dataProvider hasData
-     */
-    public function testHas(string $key, array $definitionForKey, array $mockData, bool $expected)
+    public function testGetThrowsException()
     {
-        $schema = $this->buildSchemaMock($key, $definitionForKey);
-        $filter = $this->buildFilterMock($mockData, $definitionForKey);
-        $schemaReader = $this->buildSchemaReaderMock($mockData, $key, $schema);
-
-        if (null !== $mockData['rawValue']) {
-            $this->putEnv($mockData['envName'], $mockData['rawValue']);
-        }
-
-        self::assertSame(
-            $expected,
-            (new Environment($schema, $filter, $schemaReader))->has($key)
-        );
-    }
-
-    /**
-     * @see testHas
-     */
-    public function hasData(): array
-    {
-        return [
-            'existing value with default' => [
-                'key' => 'some.config.key',
-                'definitionForKey' => [
-                    /*
-                    * It doesn't matter how this array looks like as it is only passed through
-                    *  and is expected as parameter for mocks
-                    */
-                    'Im Just Arbitrary Data That Gets Passed Around',
-                ],
-                'mockData' => [
-                    'rawValue' => '5.5',
-                    'envName' => 'INPSYDE_CONFIG_TEST_A',
-                    'filter' => [
-                        'filterValue' => [
-                            'expect' => 'never',
-                            'return' => null,
-                        ],
-                        'validateValue' => [
-                            'expect' => 'once',
-                            'return' => true,
-                        ],
-                    ],
-                    'schemaReader' => [
-                        'sourceName' => [
-                            'return' => 'INPSYDE_CONFIG_TEST_A',
-                        ],
-                        'hasDefault' => [
-                            'return' => true,
-                        ],
-                        'defaultValue' => [
-                            'return' => 10.1,
-                        ],
-                    ],
-                ],
-                'expected' => true,
-            ],
-            // Todo: fix this case
-            'existing value without default' => [
-                'key' => 'some.config.key',
-                'definitionForKey' => [
-                    'Im Just Arbitrary Data That Gets Passed Around',
-                ],
-                'mockData' => [
-                    'rawValue' => null,
-                    'envName' => 'INPSYDE_CONFIG_TEST_B',
-                    'filter' => [
-                        'filterValue' => [
-                            'expect' => 'never',
-                            'return' => null,
-                        ],
-                        'validateValue' => [
-                            'expect' => 'never',
-                            'return' => null,
-                        ],
-                    ],
-                    'schemaReader' => [
-                        'sourceName' => [
-                            'return' => 'INPSYDE_CONFIG_TEST_B',
-                        ],
-                        'hasDefault' => [
-                            'return' => true,
-                        ],
-                        'defaultValue' => [
-                            'return' => 10.01,
-                        ],
-                    ],
-                ],
-                'expected' => true,
-            ],
-            'existing invalid value without default' => [
-                'key' => 'some.config.key',
-                'definitionForKey' => [
-                    'Im Just Arbitrary Data That Gets Passed Around',
-                ],
-                'mockData' => [
-                    'rawValue' => 'foo',
-                    'envName' => 'INPSYDE_CONFIG_TEST_B',
-                    'filter' => [
-                        'filterValue' => [
-                            'expect' => 'never',
-                            'return' => null,
-                        ],
-                        'validateValue' => [
-                            'expect' => 'once',
-                            'return' => false,
-                        ],
-                    ],
-                    'schemaReader' => [
-                        'sourceName' => [
-                            'return' => 'INPSYDE_CONFIG_TEST_B',
-                        ],
-                        'hasDefault' => [
-                            'return' => false,
-                        ],
-                        'defaultValue' => [
-                            'return' => null,
-                        ],
-                    ],
-                ],
-                'expected' => false,
-            ],
-            'invalid value does not fall back to default value' => [
-                'key' => 'some.config.key',
-                'definitionForKey' => [
-                    'Im Just Arbitrary Data That Gets Passed Around',
-                ],
-                'mockData' => [
-                    'rawValue' => 'foo',
-                    'envName' => 'INPSYDE_CONFIG_TEST_B',
-                    'filter' => [
-                        'filterValue' => [
-                            'expect' => 'never',
-                            'return' => null,
-                        ],
-                        'validateValue' => [
-                            'expect' => 'once',
-                            'return' => false,
-                        ],
-                    ],
-                    'schemaReader' => [
-                        'sourceName' => [
-                            'return' => 'INPSYDE_CONFIG_TEST_B',
-                        ],
-                        'hasDefault' => [
-                            'return' => true,
-                        ],
-                        'defaultValue' => [
-                            'return' => 10.01,
-                        ],
-                    ],
-                ],
-                'expected' => false,
-            ],
-            'not existing value fall back to default value' => [
-                'key' => 'some.config.key',
-                'definitionForKey' => [
-                    'Im Just Arbitrary Data That Gets Passed Around'
-                ],
-                'mockData' => [
-                    'rawValue' => null,
-                    'envName' => 'INPSYDE_CONFIG_TEST_C',
-                    'filter' => [
-                        'filterValue' => [
-                            'expect' => 'never',
-                            'return' => null,
-                        ],
-                        'validateValue' => [
-                            'expect' => 'never',
-                            'return' => null,
-                        ],
-                    ],
-                    'schemaReader' => [
-                        'sourceName' => [
-                            'return' => 'INPSYDE_CONFIG_TEST_C',
-                        ],
-                        'hasDefault' => [
-                            'return' => true,
-                        ],
-                        'defaultValue' => [
-                            'return' => 10.1,
-                        ],
-                    ],
-                ],
-                'expected' => true,
-            ],
-            'not existing value without default' => [
-                'key' => 'some.config.key',
-                'definitionForKey' => [
-                    'Im Just Arbitrary Data That Gets Passed Around'
-                ],
-                'mockData' => [
-                    'rawValue' => null,
-                    'envName' => 'INPSYDE_CONFIG_TEST_C',
-                    'filter' => [
-                        'filterValue' => [
-                            'expect' => 'never',
-                            'return' => null,
-                        ],
-                        'validateValue' => [
-                            'expect' => 'never',
-                            'return' => null,
-                        ],
-                    ],
-                    'schemaReader' => [
-                        'sourceName' => [
-                            'return' => 'INPSYDE_CONFIG_TEST_C',
-                        ],
-                        'hasDefault' => [
-                            'return' => false,
-                        ],
-                        'defaultValue' => [
-                            'return' => null,
-                        ],
-                    ],
-                ],
-                'expected' => false,
-            ],
-        ];
-    }
-
-    public function testGetThrowsMissingConfigException()
-    {
-        $key = 'what.the.config';
+        $validKey = 'some.config.key';
+        $invalidKey = 'does.not.exist.here';
+        $filter = \Mockery::mock(Filter::class);
 
         $schema = \Mockery::mock(Schema::class);
-        $filter = \Mockery::mock(Filter::class);
-        $schemaReader = \Mockery::mock(
-            SchemaReader::class,
-            [
-                'sourceName' => '',
-            ]
-        );
+        $schema->shouldReceive('getKeys')
+            ->with(Source::SOURCE_VARIABLE)
+            ->andReturn([$validKey]);
+
+        $schemaReader = \Mockery::mock(SchemaReader::class);
+        $schemaReader->shouldReceive('hasDefault')
+            ->atLeast()->once()
+            ->with($invalidKey, $schema)
+            ->andReturn(false);
 
         self::expectException(MissingConfig::class);
 
-        (new Environment($schema, $filter, $schemaReader))
-            ->get($key);
+        (new Variable($schema, [$validKey => true], $filter, $schemaReader))
+            ->get($invalidKey);
     }
 
-    private function putEnv(string $name, string $value)
+    public function testConstructor()
     {
-        $this->environment[$name] = $value;
-        putenv("{$name}={$value}");
+        $keys = ['key.with.default', 'key.without.default'];
+        $config = [
+            'key.without.default' => 'foo',
+        ];
+        $schema = \Mockery::mock(Schema::class);
+        $schema->shouldReceive('getKeys')
+            ->atLeast()->once()
+            ->with(Source::SOURCE_VARIABLE)
+            ->andReturn($keys);
+
+        $schemaReader = \Mockery::mock(SchemaReader::class);
+        $schemaReader->shouldReceive('hasDefault')
+            ->with($keys[0], $schema)
+            ->andReturn(true);
+        $schemaReader->shouldReceive('hasDefault')
+            ->with($keys[1], $schema)
+            ->andReturn(false);
+
+        self::assertInstanceOf(
+            Variable::class,
+            new Variable($schema, $config, null, $schemaReader)
+        );
     }
 
-    private function buildSchemaMock(string $key, array $definitionForKey): Schema
+    public function testConstructorThrowsExceptionOnMissingValue()
+    {
+        $key = 'some.config.key';
+        $schema = \Mockery::mock(Schema::class);
+        $schema->shouldReceive('getKeys')
+            ->atLeast()->once()
+            ->with(Source::SOURCE_VARIABLE)
+            ->andReturn([$key]);
+
+        $schemaReader = \Mockery::mock(SchemaReader::class);
+        $schemaReader->shouldReceive('hasDefault')
+            ->with($key, $schema)
+            ->andReturn(false);
+
+        self::expectException(MissingValue::class);
+
+        (new Variable($schema, [], null, $schemaReader));
+    }
+
+    private function buildSchemaMock(string $key, array $definitionForKey, array $mockData): Schema
     {
         $schema = \Mockery::mock(Schema::class);
         $schema->shouldReceive('getDefinition')
             ->with($key)
             ->andReturn($definitionForKey);
+        $schema->shouldReceive('getKeys')
+            ->with(Source::SOURCE_VARIABLE)
+            ->andReturn($mockData['schema']['getKeys']['return']);
 
         /* @var Schema $schema */
         return $schema;
@@ -426,9 +463,6 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
     private function buildSchemaReaderMock(array $mockData, string $key, Schema $schema): SchemaReader
     {
         $reader = \Mockery::mock(SchemaReader::class);
-        $reader->shouldReceive('sourceName')
-            ->with($key, $schema)
-            ->andReturn($mockData['schemaReader']['sourceName']['return']);
         $reader->shouldReceive('hasDefault')
             ->with($key, $schema)
             ->andReturn($mockData['schemaReader']['hasDefault']['return']);
@@ -438,16 +472,5 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
 
         /* @var SchemaReader $reader */
         return $reader;
-    }
-
-    protected function tearDown()
-    {
-        parent::tearDown();
-
-        foreach (array_keys($this->environment) as $env) {
-            putenv($env);
-        }
-
-        $this->environment = [];
     }
 }

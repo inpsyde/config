@@ -51,6 +51,7 @@ class SchemaValidation
     private function ensureRequiredDefinition(array $definition, string $key): array
     {
         foreach (['source', 'source_name'] as $requiredDefinition) {
+            //Todo: source=variable doesn't require a source_name
             if (! array_key_exists($requiredDefinition, $definition)) {
                 throw new InvalidSchema(
                     "Missing definition '{$requiredDefinition}' for key '{$key}''"
