@@ -10,7 +10,7 @@ use Inpsyde\Config\Source\Variable;
 use Inpsyde\Config\Source\WpOption;
 use MonkeryTestCase\BrainMonkeyWpTestCase;
 
-class ConfigCompositionFactoryTest extends BrainMonkeyWpTestCase
+class ContainerFactoryTest extends BrainMonkeyWpTestCase
 {
 
     /**

@@ -5,7 +5,7 @@ namespace Inpsyde\Config;
 
 use MonkeryTestCase\BrainMonkeyWpTestCase;
 
-class ConfigCompositionTest extends BrainMonkeyWpTestCase
+class ContainerTest extends BrainMonkeyWpTestCase
 {
 
     /**
