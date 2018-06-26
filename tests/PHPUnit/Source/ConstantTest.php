@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config\Source;
 
-use Inpsyde\Config\Exception\MissingConfig;
+use Inpsyde\Config\Exception\UnknownKey;
 use Inpsyde\Config\Filter;
 use Inpsyde\Config\Helper\SchemaReader;
 use Inpsyde\Config\Schema;
@@ -386,7 +386,7 @@ class ConstantTest extends BrainMonkeyWpTestCase
                 'getDefinition' => [],
             ]
         );
-        self::expectException(MissingConfig::class);
+        self::expectException(UnknownKey::class);
 
         (new Constant($schema))
             ->get('not.me');

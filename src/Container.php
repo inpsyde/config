@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config;
 
-use Inpsyde\Config\Exception\MissingConfig;
+use Inpsyde\Config\Exception\UnknownKey;
 
 final class Container implements Config
 {
@@ -26,7 +26,7 @@ final class Container implements Config
     public function get(string $key)
     {
         if (! array_key_exists($key, $this->sources)){
-            throw new MissingConfig("No configuration configured for '{$key}'");
+            throw new UnknownKey("No configuration configured for '{$key}'");
         }
 
         return $this->sources[$key]

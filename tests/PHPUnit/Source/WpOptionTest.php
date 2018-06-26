@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Inpsyde\Config\Source;
 
 use Brain\Monkey\Functions;
-use Inpsyde\Config\Exception\MissingConfig;
+use Inpsyde\Config\Exception\UnknownKey;
 use Inpsyde\Config\Filter;
 use Inpsyde\Config\Helper\SchemaReader;
 use Inpsyde\Config\Schema;
@@ -392,7 +392,7 @@ class WpOptionTest extends BrainMonkeyWpTestCase
             ->with($key)
             ->andReturn([]);
 
-        self::expectException(MissingConfig::class);
+        self::expectException(UnknownKey::class);
 
         (new WpOption(
             function () {

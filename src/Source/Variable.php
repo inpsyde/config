@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config\Source;
 
-use Inpsyde\Config\Exception\MissingConfig;
+use Inpsyde\Config\Exception\UnknownKey;
 use Inpsyde\Config\Exception\MissingValue;
 use Inpsyde\Config\Filter;
 use Inpsyde\Config\Helper\SchemaReader;
@@ -52,7 +52,7 @@ final class Variable implements Source
     public function get(string $key)
     {
         if (! $this->has($key)) {
-            throw new MissingConfig("Key: {$key}");
+            throw new UnknownKey("Key: {$key}");
         }
         if (array_key_exists($key, $this->config)) {
             $definition = $this->schema->getDefinition($key);

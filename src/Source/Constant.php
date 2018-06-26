@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config\Source;
 
-use Inpsyde\Config\Exception\MissingConfig;
+use Inpsyde\Config\Exception\UnknownKey;
 use Inpsyde\Config\Exception\MissingDefaultValue;
 use Inpsyde\Config\Filter;
 use Inpsyde\Config\Helper\SchemaReader;
@@ -43,7 +43,7 @@ final class Constant implements Source
     public function get(string $key)
     {
         if (! $this->has($key)) {
-            throw new MissingConfig("Missing env config: '{$key}'");
+            throw new UnknownKey("Missing env config: '{$key}'");
         }
 
         $name = $this->reader->sourceName($key, $this->schema);

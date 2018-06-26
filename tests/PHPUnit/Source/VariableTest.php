@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config\Source;
 
-use Inpsyde\Config\Exception\MissingConfig;
+use Inpsyde\Config\Exception\UnknownKey;
 use Inpsyde\Config\Exception\MissingValue;
 use Inpsyde\Config\Filter;
 use Inpsyde\Config\Helper\SchemaReader;
@@ -379,7 +379,7 @@ class VariableTest extends BrainMonkeyWpTestCase
             ->with($invalidKey, $schema)
             ->andReturn(false);
 
-        self::expectException(MissingConfig::class);
+        self::expectException(UnknownKey::class);
 
         (new Variable($schema, [$validKey => true], $filter, $schemaReader))
             ->get($invalidKey);
