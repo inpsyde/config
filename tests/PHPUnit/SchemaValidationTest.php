@@ -25,10 +25,13 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
         );
 
         foreach ($expected as $key => $definition) {
-            self::assertSame(
+            self::assertEquals(
                 $definition,
                 $schema->getDefinition($key),
-                "Failed for key {$key}"
+                "Failed for key {$key}",
+                0.0,
+                10,
+                true
             );
         }
     }

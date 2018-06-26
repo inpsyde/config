@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Inpsyde\Config;
 
 use Inpsyde\Config\Exception\InvalidSchema;
+use Inpsyde\Config\Source\Source;
 
 class SchemaValidation
 {
@@ -50,13 +51,18 @@ class SchemaValidation
      */
     private function ensureRequiredDefinition(array $definition, string $key): array
     {
-        foreach (['source', 'source_name'] as $requiredDefinition) {
-            //Todo: source=variable doesn't require a source_name
-            if (! array_key_exists($requiredDefinition, $definition)) {
+        $requireField = function ($field) use ($definition, $key) {
+            if (! array_key_exists($field, $definition)) {
                 throw new InvalidSchema(
-                    "Missing definition '{$requiredDefinition}' for key '{$key}''"
+                    "Missing definition '{$field}' for key '{$key}''"
                 );
             }
+        };
+        $requireField('source');
+        if (Source::SOURCE_VARIABLE !== $definition['source']) {
+            $requireField('source_name');
+        } else {
+            $definition['source_name'] = null;
         }
 
         return $definition;

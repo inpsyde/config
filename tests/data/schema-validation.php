@@ -63,6 +63,37 @@ return [
                 ],
             ],
         ],
+        '04: source variable does not require a source_name' => [
+            'schema' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_VARIABLE,
+                    'filter' => FILTER_SANITIZE_EMAIL,
+                ],
+            ],
+            'expected' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_VARIABLE,
+                    'filter' => FILTER_SANITIZE_EMAIL,
+                    'source_name' => null,
+                ],
+            ],
+        ],
+        '05: source variable overrides source_name' => [
+            'schema' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_VARIABLE,
+                    'source_name' => 'whatever',
+                    'filter' => FILTER_SANITIZE_EMAIL,
+                ],
+            ],
+            'expected' => [
+                'some.config.key' => [
+                    'source' => \Inpsyde\Config\Source\Source::SOURCE_VARIABLE,
+                    'source_name' => null,
+                    'filter' => FILTER_SANITIZE_EMAIL,
+                ],
+            ],
+        ],
     ],
     'testValidateSchemaThrowsException' => [
         'missing config key' => [
@@ -93,7 +124,7 @@ return [
             ],
             'expectedException' => InvalidSchema::class,
         ],
-        'definition missing source_name' => [
+        'definition missing source' => [
             'schema' => [
                 'some.config.key' => [
                     'source_name' => 'foo',
