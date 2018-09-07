@@ -15,7 +15,7 @@ class LoaderTest extends BrainMonkeyWpTestCase
      */
     public function testLoadFromArray()
     {
-        $config = require dirname(__DIR__).'/data/loader-test.php';
+        $config = require __DIR__.'/../data/data-LoaderTest.php';
         self::assertInstanceOf(
             Config::class,
             Loader::loadFromArray($config)
@@ -27,7 +27,7 @@ class LoaderTest extends BrainMonkeyWpTestCase
      */
     public function testLoadFromFile()
     {
-        $file = dirname(__DIR__).'/data/loader-test.php';
+        $file = __DIR__ . '/../data/data-LoaderTest.php';
         self::assertInstanceOf(
             Config::class,
             Loader::loadFromFile($file)
@@ -39,7 +39,7 @@ class LoaderTest extends BrainMonkeyWpTestCase
      */
     public function testFunctionalLoadFromArray()
     {
-        $configSchema = require dirname(__DIR__).'/data/loader-test.php';
+        $configSchema = require __DIR__.'/../data/data-LoaderTest.php';
         $value = 3.14;
         $this->putEnv('CONFIG_LOADER_TEST', (string) $value);
 
@@ -56,7 +56,7 @@ class LoaderTest extends BrainMonkeyWpTestCase
      */
     public function testFunctionalLoadFromFile()
     {
-        $file = dirname(__DIR__).'/data/loader-test.php';
+        $file = __DIR__.'/../data/data-LoaderTest.php';
         $value = 3.14159;
         $this->putEnv('CONFIG_LOADER_TEST', (string) $value);
 

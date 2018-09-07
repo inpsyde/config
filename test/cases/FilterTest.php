@@ -8,7 +8,8 @@ use MonkeryTestCase\BrainMonkeyWpTestCase;
 class FilterTest extends BrainMonkeyWpTestCase
 {
 
-    private static $testData = [];
+    private static $filterValueData = [];
+    private static $validateValueData = [];
 
     /**
      * @dataProvider filterValueData
@@ -27,11 +28,11 @@ class FilterTest extends BrainMonkeyWpTestCase
      */
     public function filterValueData(): array
     {
-        if (! self::$testData) {
-            self::$testData = require __DIR__.'/../data/filter.php';
+        if (! self::$filterValueData) {
+            self::$filterValueData = require __DIR__.'/../data/data-FilterTest::testFilterValue.php';
         }
 
-        return self::$testData['testFilterValue'];
+        return self::$filterValueData;
     }
 
     /**
@@ -51,10 +52,10 @@ class FilterTest extends BrainMonkeyWpTestCase
      */
     public function validateValueData(): array
     {
-        if (! self::$testData) {
-            self::$testData = require __DIR__.'/../data/filter.php';
+        if (! self::$validateValueData) {
+            self::$filterValueData = require __DIR__.'/../data/data-FilterTest::testValidateValue.php';
         }
 
-        return self::$testData['testValidateValue'];
+        return self::$validateValueData;
     }
 }

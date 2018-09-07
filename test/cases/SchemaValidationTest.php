@@ -8,7 +8,9 @@ use MonkeryTestCase\BrainMonkeyWpTestCase;
 class SchemaValidationTest extends BrainMonkeyWpTestCase
 {
 
-    private static $testData = [];
+    private static $validateSchemaThrowsExceptionData = [];
+
+    private static $validateSchemaData = [];
 
     /**
      * @dataProvider validateSchemaData
@@ -41,11 +43,11 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
      */
     public function validateSchemaData(): array
     {
-        if (! self::$testData) {
-            self::$testData = require __DIR__.'/../data/schema-validation.php';
+        if (! self::$validateSchemaData) {
+            self::$validateSchemaData = require __DIR__.'/../data/data-SchemaValidationTest::testValidateSchema.php';
         }
 
-        return self::$testData['testValidateSchema'];
+        return self::$validateSchemaData;
     }
 
     /**
@@ -63,11 +65,11 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
      */
     public function validateSchemaThrowsExceptionData(): array
     {
-
-        if (! self::$testData) {
-            self::$testData = require __DIR__.'/../data/schema-validation.php';
+        if (! self::$validateSchemaThrowsExceptionData) {
+            self::$validateSchemaThrowsExceptionData = require __DIR__
+                .'/../data/data-SchemaValidationTest::testValidateSchemaThrowsException.php';
         }
 
-        return self::$testData['testValidateSchemaThrowsException'];
+        return self::$validateSchemaThrowsExceptionData;
     }
 }
