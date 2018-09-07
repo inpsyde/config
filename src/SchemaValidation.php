@@ -6,6 +6,7 @@ namespace Inpsyde\Config;
 use Inpsyde\Config\Exception\InvalidSchema;
 use Inpsyde\Config\Source\Source;
 
+// Todo: Rename schema fields to camelCase 
 class SchemaValidation
 {
 

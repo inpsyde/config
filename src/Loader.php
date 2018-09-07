@@ -8,6 +8,7 @@ use Inpsyde\Config\Exception\RuntimeException;
 class Loader
 {
 
+    //Todo: Test integration of dynamic injected config values $config
     public static function loadFromArray(array $definition, array $config = []): Config
     {
         return (new ContainerFactory(new SchemaValidation()))
