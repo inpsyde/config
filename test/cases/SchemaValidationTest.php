@@ -12,7 +12,7 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider validateSchemaData
-     * @throws \Throwable
+     * @group unit
      */
     public function testValidateSchema(array $schema, array $expected)
     {
@@ -50,6 +50,7 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider validateSchemaThrowsExceptionData
+     * @group unit
      */
     public function testValidateSchemaThrowsException(array $schema, string $expectedException)
     {

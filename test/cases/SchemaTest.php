@@ -11,6 +11,7 @@ class SchemaTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider definitionData
+     * @group unit
      */
     public function testGetKeys(array $definition, $unnused, $expectedKeys)
     {
@@ -24,6 +25,7 @@ class SchemaTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider definitionData
+     * @group unit
      */
     public function testGetKeysForSource(array $definition, array $expectedSource)
     {
@@ -40,6 +42,7 @@ class SchemaTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider definitionData
+     * @group unit
      */
     public function testGetDefinition(array $definitions)
     {

@@ -15,6 +15,7 @@ class WpOptionTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider hasData
+     * @group unit
      */
     public function testHas(string $key, array $definitionForKey, array $mockData, bool $expected)
     {
@@ -250,6 +251,7 @@ class WpOptionTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider getData
+     * @group unit
      */
     public function testGet(string $key, array $definitionForKey, array $mockData, $expected)
     {
@@ -382,6 +384,9 @@ class WpOptionTest extends BrainMonkeyWpTestCase
         ];
     }
 
+    /**
+     * @group unit
+     */
     public function testGetThrowsMissingConfigException()
     {
         $schema = \Mockery::mock(Schema::class);
@@ -401,6 +406,9 @@ class WpOptionTest extends BrainMonkeyWpTestCase
             ->get($key);
     }
 
+    /**
+     * @group unit
+     */
     public function testAsWpOption()
     {
         $key = 'site.home_url';
@@ -438,6 +446,9 @@ class WpOptionTest extends BrainMonkeyWpTestCase
         );
     }
 
+    /**
+     * @group unit
+     */
     public function testAsWpSiteOption()
     {
         $key = 'site.home_url';

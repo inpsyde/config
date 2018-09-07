@@ -10,6 +10,7 @@ class ContainerTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider getData
+     * @group unit
      */
     public function testGet(array $components, string $key, $expected)
     {
@@ -53,6 +54,7 @@ class ContainerTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider hasData
+     * @group unit
      */
     public function testHas(array $components, string $key, bool $expected)
     {
@@ -93,6 +95,7 @@ class ContainerTest extends BrainMonkeyWpTestCase
             ],
         ];
     }
+
     private function mockComponents(array $components, string $method): array
     {
         array_walk(

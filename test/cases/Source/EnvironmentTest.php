@@ -16,6 +16,7 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider getData
+     * @group unit
      */
     public function testGet(string $key, array $mockData, $expected)
     {
@@ -135,6 +136,7 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider hasData
+     * @group unit
      */
     public function testHas(string $key, array $mockData, bool $expected)
     {
@@ -336,6 +338,9 @@ class EnvironmentTest extends BrainMonkeyWpTestCase
         ];
     }
 
+    /**
+     * @group unit
+     */
     public function testGetThrowsMissingConfigException()
     {
         $key = 'what.the.config';

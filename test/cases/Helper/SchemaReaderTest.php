@@ -11,6 +11,9 @@ use MonkeryTestCase\BrainMonkeyWpTestCase;
 class SchemaReaderTest extends BrainMonkeyWpTestCase
 {
 
+    /**
+     * @group unit
+     */
     public function testSourceName()
     {
         $key = 'some.config.key';
@@ -34,6 +37,7 @@ class SchemaReaderTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider hasDefaultData
+     * @group unit
      */
     public function testHasDefault(string $key, array $definition, bool $expected)
     {
@@ -75,6 +79,9 @@ class SchemaReaderTest extends BrainMonkeyWpTestCase
         ];
     }
 
+    /**
+     * @group unit
+     */
     public function testDefaultValue()
     {
         $key = 'some.key';
@@ -94,6 +101,9 @@ class SchemaReaderTest extends BrainMonkeyWpTestCase
         );
     }
 
+    /**
+     * @group unit
+     */
     public function testDefaultValueThrowsException()
     {
         $key = 'some.key';

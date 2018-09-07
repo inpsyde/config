@@ -12,6 +12,7 @@ class FilterTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider filterValueData
+     * @group unit
      */
     public function testFilterValue($value, array $schema, $expected)
     {
@@ -35,6 +36,7 @@ class FilterTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider validateValueData
+     * @group unit
      */
     public function testValidateValue($value, array $schema, bool $expected)
     {

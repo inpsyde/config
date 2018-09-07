@@ -15,6 +15,7 @@ class ContainerFactoryTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider buildSourcesListData
+     * @group unit
      */
     public function testBuildSourcesList(
         array $definition,
@@ -50,7 +51,7 @@ class ContainerFactoryTest extends BrainMonkeyWpTestCase
             true // order of array elements is not relevant
         );
 
-        foreach ( $expectations as $key => $sourceType ) {
+        foreach ($expectations as $key => $sourceType) {
             self::assertInstanceOf(
                 $sourceType,
                 $sourceList[$key],
@@ -117,7 +118,7 @@ class ContainerFactoryTest extends BrainMonkeyWpTestCase
                     ],
                     Source::SOURCE_VARIABLE => [
                         'config.variable.one',
-                    ]
+                    ],
                 ],
                 'expectations' => [
                     'config.env.one' => Environment::class,

@@ -15,6 +15,7 @@ class VariableTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider hasData
+     * @group unit
      */
     public function testHas(string $key, array $mockData, bool $expected)
     {
@@ -238,6 +239,7 @@ class VariableTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider getData
+     * @group unit
      */
     public function testGet(string $key, array $mockData, $expected)
     {
@@ -362,6 +364,9 @@ class VariableTest extends BrainMonkeyWpTestCase
         ];
     }
 
+    /**
+     * @group unit
+     */
     public function testGetThrowsException()
     {
         $validKey = 'some.config.key';
@@ -385,6 +390,9 @@ class VariableTest extends BrainMonkeyWpTestCase
             ->get($invalidKey);
     }
 
+    /**
+     * @group unit
+     */
     public function testConstructor()
     {
         $keys = ['key.with.default', 'key.without.default'];
@@ -411,6 +419,9 @@ class VariableTest extends BrainMonkeyWpTestCase
         );
     }
 
+    /**
+     * @group unit
+     */
     public function testConstructorThrowsExceptionOnMissingValue()
     {
         $key = 'some.config.key';

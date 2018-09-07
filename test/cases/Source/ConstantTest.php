@@ -17,6 +17,7 @@ class ConstantTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider hasData
+     * @group unit
      */
     public function testHas(string $key, array $definitionForKey, array $mockData, bool $expected)
     {
@@ -255,6 +256,7 @@ class ConstantTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider getData
+     * @group unit
      */
     public function testGet(string $key, array $definitionForKey, array $mockData, $expected)
     {
@@ -378,6 +380,9 @@ class ConstantTest extends BrainMonkeyWpTestCase
         ];
     }
 
+    /**
+     * @group unit
+     */
     public function testGetThrowsException()
     {
         $schema = \Mockery::mock(
