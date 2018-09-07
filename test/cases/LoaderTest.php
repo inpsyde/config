@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config;
 
+use Inpsyde\Config\Exception\RuntimeException;
 use MonkeryTestCase\BrainMonkeyWpTestCase;
 
 class LoaderTest extends BrainMonkeyWpTestCase
@@ -32,6 +33,35 @@ class LoaderTest extends BrainMonkeyWpTestCase
             Config::class,
             Loader::loadFromFile($file)
         );
+    }
+
+    /**
+     * @dataProvider loadFromFileThrowsExceptionData
+     */
+    public function testLoadFromFileThrowsException(string $file, string $expectedException)
+    {
+        self::expectException($expectedException);
+        Loader::loadFromFile($file);
+    }
+
+    /**
+     * @see testLoadFromFileThrowsException
+     */
+    public function loadFromFileThrowsExceptionData(): array {
+        return [
+            'file is not valid file' => [
+                'file' => __DIR__,
+                'expectedException' => RuntimeException::class,
+            ],
+            'file is not readable' => [
+                'file' => '/root/.bash_history',
+                'expectedException' => RuntimeException::class,
+            ],
+            'file does not contain array' => [
+                'file' => __DIR__ .'/../data/data-LoaderTest::testLoadFromFileThrowsException.php',
+                'expectedException' => RuntimeException::class,
+            ]
+        ];
     }
 
     /**
