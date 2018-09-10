@@ -15,14 +15,14 @@ class SchemaReader
 
         return empty($definition)
             ? ''
-            : $definition['source_name'];
+            : $definition['sourceName'];
     }
 
     public function hasDefault(string $key, Schema $schema): bool
     {
 
         return array_key_exists(
-            'default_value',
+            'defaultValue',
             $schema->getDefinition($key)
         );
     }
@@ -33,6 +33,6 @@ class SchemaReader
             throw new MissingDefaultValue("Key: '{$key}'");
         }
 
-        return $schema->getDefinition($key)['default_value'];
+        return $schema->getDefinition($key)['defaultValue'];
     }
 }

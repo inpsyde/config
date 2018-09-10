@@ -128,8 +128,8 @@ class WpOptionTest extends BrainMonkeyWpTestCase
         $expected = 'http://my.site';
         $definition = [
             'source' => Source::SOURCE_WP_OPTION,
-            'source_name' => 'home',
-            'default_value' => $defaultValue,
+            'sourceName' => 'home',
+            'defaultValue' => $defaultValue,
         ];
 
         $schema = \Mockery::mock(Schema::class);
@@ -168,8 +168,8 @@ class WpOptionTest extends BrainMonkeyWpTestCase
         $expected = 'http://my.site';
         $definition = [
             'source' => Source::SOURCE_WP_OPTION,
-            'source_name' => 'home',
-            'default_value' => $defaultValue,
+            'sourceName' => 'home',
+            'defaultValue' => $defaultValue,
         ];
 
         $schema = \Mockery::mock(Schema::class);

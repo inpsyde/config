@@ -25,7 +25,7 @@ class SchemaReaderTest extends BrainMonkeyWpTestCase
             ->andReturn(
                 [
                     'source' => 'doesntMatter',
-                    'source_name' => $sourceName,
+                    'sourceName' => $sourceName,
                 ]
             );
 
@@ -63,8 +63,8 @@ class SchemaReaderTest extends BrainMonkeyWpTestCase
                 'key' => 'what.ever',
                 'definition' => [
                     'source' => 'irrelevant',
-                    'source_name' => 'irrelevant',
-                    'default_value' => 'Hello World'
+                    'sourceName' => 'irrelevant',
+                    'defaultValue' => 'Hello World'
                 ],
                 'expected' => true,
             ],
@@ -72,7 +72,7 @@ class SchemaReaderTest extends BrainMonkeyWpTestCase
                 'key' => 'what.ever',
                 'definition' => [
                     'source' => 'irrelevant',
-                    'source_name' => 'irrelevant',
+                    'sourceName' => 'irrelevant',
                 ],
                 'expected' => false,
             ],
@@ -91,7 +91,7 @@ class SchemaReaderTest extends BrainMonkeyWpTestCase
             ->with($key)
             ->andReturn(
                 [
-                    'default_value' => $defaultValue
+                    'defaultValue' => $defaultValue
                 ]
             );
 
@@ -113,7 +113,7 @@ class SchemaReaderTest extends BrainMonkeyWpTestCase
             ->andReturn(
                 [
                     'source' => Source::SOURCE_ENV,
-                    'source_name' => 'SOME_ENV_VAR',
+                    'sourceName' => 'SOME_ENV_VAR',
                 ]
             );
 

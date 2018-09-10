@@ -34,7 +34,7 @@ return [
     'definition missing source' => [
         'schema' => [
             'some.config.key' => [
-                'source_name' => 'foo',
+                'sourceName' => 'foo',
             ],
         ],
         'expectedException' => InvalidSchema::class,
@@ -47,13 +47,13 @@ return [
             ],
         ],
         'expectedException' => InvalidSchema::class,
-        'expectedExceptionMessage' => "Missing definition 'source_name' for key 'some.config.key'",
+        'expectedExceptionMessage' => "Missing definition 'sourceName' for key 'some.config.key'",
     ],
     'filter invalid' => [
         'schema' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_WP_SITEOPTION,
-                'source_name' => '_my_siteoption',
+                'sourceName' => '_my_siteoption',
                 'filter' => 'FILTER_VALIDATE_BOOLEAN',
             ],
         ],
@@ -64,7 +64,7 @@ return [
         'schema' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_WP_SITEOPTION,
-                'source_name' => '_my_siteoption',
+                'sourceName' => '_my_siteoption',
                 'filter' => PHP_INT_MAX,
             ],
         ],

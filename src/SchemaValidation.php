@@ -6,7 +6,6 @@ namespace Inpsyde\Config;
 use Inpsyde\Config\Exception\InvalidSchema;
 use Inpsyde\Config\Source\Source;
 
-// Todo: Rename schema fields to camelCase
 class SchemaValidation
 {
 
@@ -57,9 +56,9 @@ class SchemaValidation
         };
         $requireField('source');
         if (Source::SOURCE_VARIABLE !== $definition['source']) {
-            $requireField('source_name');
+            $requireField('sourceName');
         } else {
-            $definition['source_name'] = null;
+            $definition['sourceName'] = null;
         }
 
         return $definition;

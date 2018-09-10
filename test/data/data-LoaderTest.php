@@ -12,7 +12,7 @@ use Inpsyde\Config\Source\Source;
 return [
     'inpsyde.config.loaderTest' => [
         'source' => Source::SOURCE_ENV,
-        'source_name' => 'CONFIG_LOADER_TEST',
+        'sourceName' => 'CONFIG_LOADER_TEST',
         'filter' => FILTER_VALIDATE_FLOAT,
     ]
 ];

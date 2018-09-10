@@ -22,16 +22,16 @@ return [
         'schema' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'default_value' => '',
+                'sourceName' => 'SOME_ENV_VARIABLE',
+                'defaultValue' => '',
                 'filter' => $filterCallback,
             ],
         ],
         'expected' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'default_value' => '',
+                'sourceName' => 'SOME_ENV_VARIABLE',
+                'defaultValue' => '',
                 'filter' => $filterCallback,
             ],
         ],
@@ -40,15 +40,15 @@ return [
         'schema' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'default_value' => '',
+                'sourceName' => 'SOME_ENV_VARIABLE',
+                'defaultValue' => '',
             ],
         ],
         'expected' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
-                'default_value' => '',
+                'sourceName' => 'SOME_ENV_VARIABLE',
+                'defaultValue' => '',
                 'filter' => null,
             ],
         ],
@@ -57,19 +57,19 @@ return [
         'schema' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
+                'sourceName' => 'SOME_ENV_VARIABLE',
                 'filter' => FILTER_SANITIZE_EMAIL,
             ],
         ],
         'expected' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_ENV,
-                'source_name' => 'SOME_ENV_VARIABLE',
+                'sourceName' => 'SOME_ENV_VARIABLE',
                 'filter' => FILTER_SANITIZE_EMAIL,
             ],
         ],
     ],
-    '04: source variable does not require a source_name' => [
+    '04: source variable does not require a sourceName' => [
         'schema' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_VARIABLE,
@@ -80,22 +80,22 @@ return [
             'some.config.key' => [
                 'source' => Source::SOURCE_VARIABLE,
                 'filter' => FILTER_SANITIZE_EMAIL,
-                'source_name' => null,
+                'sourceName' => null,
             ],
         ],
     ],
-    '05: source variable overrides source_name' => [
+    '05: source variable overrides sourceName' => [
         'schema' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_VARIABLE,
-                'source_name' => 'whatever',
+                'sourceName' => 'whatever',
                 'filter' => FILTER_SANITIZE_EMAIL,
             ],
         ],
         'expected' => [
             'some.config.key' => [
                 'source' => Source::SOURCE_VARIABLE,
-                'source_name' => null,
+                'sourceName' => null,
                 'filter' => FILTER_SANITIZE_EMAIL,
             ],
         ],
