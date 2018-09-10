@@ -123,6 +123,38 @@ $customFilteredValue = $config->get('domain.some.komplex_value');
     Source::CONSTANT
     Source::VARIABLE
 
+### Defining configuration values on runtime
+
+Sometimes it's useful to define configuration values on runtime. This is how you can do:
+
+    <?php
+    // config-schema.php
+    
+    namespace MyPlugin;
+    
+    use Inpsyde\Config\Source
+    
+    return [
+        'myPlugin.baseDir => [
+            'source' => Source::VARIABLE,
+        ],
+    ];
+
+
+    <?php
+    // my-plugin.php
+    
+    namespace MyPlugin;
+    
+    use Inpsyde\Config\Loader;
+    
+    $container = Loader::loadFromFile(
+        'config-schema.php',
+        [
+            'myPlugin.baseDir' => __DIR__
+        ]
+    );
+
 ## Roadmap
 
  * Complete tests and implementation
