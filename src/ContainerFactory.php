@@ -78,7 +78,7 @@ class ContainerFactory
                 Schema $schema,
                 Filter $filter = null,
                 SchemaReader $reader = null,
-                array $config
+                array $config = []
             ) {
                 return new Variable($schema, $config, $filter, $reader);
             },

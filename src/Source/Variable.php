@@ -35,8 +35,12 @@ final class Variable implements Source
     /**
      * @throws MissingValue
      */
-    public function __construct(Schema $schema, array $config, Filter $filter = null, SchemaReader $reader = null)
-    {
+    public function __construct(
+        Schema $schema,
+        array $config = [],
+        Filter $filter = null,
+        SchemaReader $reader = null
+    ) {
         $this->schema = $schema;
         $this->filter = $filter
             ?: new Filter();
@@ -92,7 +96,7 @@ final class Variable implements Source
         );
 
         if (! empty($diff)) {
-            throw new MissingValue("Keys: ". implode(',', $diff));
+            throw new MissingValue("Keys: ".implode(',', $diff));
         }
     }
 }

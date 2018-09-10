@@ -15,7 +15,7 @@ class ContainerFactoryTest extends BrainMonkeyWpTestCase
 
     /**
      * @dataProvider buildSourcesListData
-     * @group unit
+     * @group integration
      */
     public function testBuildSourcesList(
         array $definition,
