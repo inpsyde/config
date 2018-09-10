@@ -67,10 +67,15 @@ The configuration definition follows an associative schema:
 
 Example:
 
+    <?php
+    Namespace MyPlugin;
+    
+    use Inpsyde\Config\Source\Source;
+    
     return [
         'message.api.endpoint' => [
             // The configuration is read from an environment variable
-            'source' => \Inpsyde\Config\Source\Source::SOURCE_ENV,
+            'source' => Source::SOURCE_ENV,
             // This is the name of this env variable
             'source_name' => 'SOME_ENV_VARIABLE',
             // Optional: you can provide a default value as fallback if the variable is not set
@@ -80,7 +85,7 @@ Example:
         ],
         'domain.some.key' => [
             // In this case the option is read from WP site options
-            'source' => \Inpsyde\Config\Source\Source::SOURCE_WP_SITEOPTION,
+            'source' => Source::SOURCE_WP_SITEOPTION,
             // With this option key
             'source_name' => '_option_key',
             'filter' => FILTER_VALIDATE_FLOAT,
@@ -90,7 +95,7 @@ Example:
          * more complex filtering
          */
         'domain.some.komplex_value' => [
-            'source' => \Inpsyde\Config\Source\Source::SOURCE_WP_OPTION,
+            'source' => Source::SOURCE_WP_OPTION,
             'source_name' => '_option_key',
             'default_value' => null,
             'filter' => function($value): string {
@@ -115,7 +120,8 @@ $customFilteredValue = $config->get('domain.some.komplex_value');
 
 ### Available sources
 
-    use Inpsyde\Config\Source
+    <?php
+    use Inpsyde\Config\Source\Source;
     
     Source::SOURCE_ENV
     Source::SOURCE_WP_OPTION
@@ -132,7 +138,7 @@ Sometimes it's useful to define configuration values on runtime. This is how you
     
     namespace MyPlugin;
     
-    use Inpsyde\Config\Source
+    use Inpsyde\Config\Source\Source;
     
     return [
         'myPlugin.baseDir => [
