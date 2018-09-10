@@ -15,25 +15,21 @@ return [
             ],
         ],
         'expectedException' => InvalidSchema::class,
-    ],
-    'duplicate key' => [
-        'schema' => [
-            'some.config.key' => [],
-            'some.config.key' => [],
-        ],
-        'expectedException' => InvalidSchema::class,
+        'expectedExceptionMessage' => 'Schema must be an associative array',
     ],
     'definition not array' => [
         'schema' => [
             'some.config.key' => 'foo',
         ],
         'expectedException' => InvalidSchema::class,
+        'expectedExceptionMessage' => 'Key definition must be an array',
     ],
     'empty definition' => [
         'schema' => [
             'some.config.key' => [],
         ],
         'expectedException' => InvalidSchema::class,
+        'expectedExceptionMessage' => "Missing definition 'source' for key 'some.config.key'",
     ],
     'definition missing source' => [
         'schema' => [
@@ -42,6 +38,7 @@ return [
             ],
         ],
         'expectedException' => InvalidSchema::class,
+        'expectedExceptionMessage' => "Missing definition 'source' for key 'some.config.key'",
     ],
     'definition missing name' => [
         'schema' => [
@@ -50,6 +47,7 @@ return [
             ],
         ],
         'expectedException' => InvalidSchema::class,
+        'expectedExceptionMessage' => "Missing definition 'source_name' for key 'some.config.key'",
     ],
     'filter invalid' => [
         'schema' => [
@@ -60,6 +58,7 @@ return [
             ],
         ],
         'expectedException' => InvalidSchema::class,
+        'expectedExceptionMessage' => "Filter must be either callable or integer for key 'some.config.key'",
     ],
     'filter unknown' => [
         'schema' => [
@@ -70,5 +69,6 @@ return [
             ],
         ],
         'expectedException' => InvalidSchema::class,
+        'expectedExceptionMessage' => "Invalid filter for key 'some.config.key'",
     ],
 ];

@@ -6,7 +6,7 @@ namespace Inpsyde\Config;
 use Inpsyde\Config\Exception\InvalidSchema;
 use Inpsyde\Config\Source\Source;
 
-// Todo: Rename schema fields to camelCase 
+// Todo: Rename schema fields to camelCase
 class SchemaValidation
 {
 
@@ -34,10 +34,6 @@ class SchemaValidation
             throw new InvalidSchema('Schema must be an associative array');
         }
 
-        if (array_key_exists($key, $this->schema)) {
-            throw new InvalidSchema("Duplicate definition for key '{$key}'");
-        }
-
         if (! is_array($definition)) {
             throw new InvalidSchema('Key definition must be an array');
         }
@@ -55,7 +51,7 @@ class SchemaValidation
         $requireField = function ($field) use ($definition, $key) {
             if (! array_key_exists($field, $definition)) {
                 throw new InvalidSchema(
-                    "Missing definition '{$field}' for key '{$key}''"
+                    "Missing definition '{$field}' for key '{$key}'"
                 );
             }
         };
@@ -108,7 +104,7 @@ class SchemaValidation
         ];
 
         if (! in_array($definition['filter'], $availableFilters, true)) {
-            throw new InvalidSchema("Filter is not valid for key '{$key}'");
+            throw new InvalidSchema("Invalid filter for key '{$key}'");
         }
 
         return $definition;

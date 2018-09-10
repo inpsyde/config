@@ -54,9 +54,13 @@ class SchemaValidationTest extends BrainMonkeyWpTestCase
      * @dataProvider validateSchemaThrowsExceptionData
      * @group unit
      */
-    public function testValidateSchemaThrowsException(array $schema, string $expectedException)
-    {
+    public function testValidateSchemaThrowsException(
+        array $schema,
+        string $expectedException,
+        string $expectedExceptionMessage
+    ) {
         self::expectException($expectedException);
+        self::expectExceptionMessage($expectedExceptionMessage);
         (new SchemaValidation())->validateSchema($schema);
     }
 
