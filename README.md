@@ -141,7 +141,7 @@ Sometimes it's useful to define configuration values on runtime. This is how you
     use Inpsyde\Config\Source\Source;
     
     return [
-        'myPlugin.baseDir => [
+        'myPlugin.baseDir' => [
             'source' => Source::VARIABLE,
         ],
     ];
