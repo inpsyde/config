@@ -26,10 +26,10 @@ class ContainerFactory
         $this->validator = $validator;
     }
 
-    public function buildContainer(array $schema, array $config = []): Config
+    public function buildContainer(array $definition, array $config = []): Config
     {
         return new Container(
-            $this->buildSourcesList($schema)
+            $this->buildSourcesList($definition, $config)
         );
     }
 

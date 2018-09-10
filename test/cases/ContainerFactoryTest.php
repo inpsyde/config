@@ -14,8 +14,46 @@ class ContainerFactoryTest extends BrainMonkeyWpTestCase
 {
 
     /**
+     * @group unit
+     */
+    public function testBuildContainer()
+    {
+        $definition = [
+            'some.config.key' => [
+                'source' => Source::SOURCE_VARIABLE,
+            ],
+        ];
+        $config = [
+            'some.config.key' => 3.1415,
+        ];
+        $schema = \Mockery::mock(Schema::class);
+        $schema->shouldReceive('getKeys')
+            ->andReturnUsing(
+                function ($source): array {
+                    return Source::SOURCE_VARIABLE === $source
+                        ? ['some.config.key']
+                        : [];
+                }
+            );
+        $schema->shouldReceive('getDefinition')
+            ->with('some.config.key')
+            ->andReturn($definition['some.config.key']);
+
+        $validator = \Mockery::mock(SchemaValidation::class);
+        $validator->shouldReceive('validateSchema')
+            ->with($definition)
+            ->andReturn($schema);
+
+        static::assertInstanceOf(
+            Config::class,
+            (new ContainerFactory($validator))
+                ->buildContainer($definition, $config)
+        );
+    }
+
+    /**
      * @dataProvider buildSourcesListData
-     * @group integration
+     * @group unit
      */
     public function testBuildSourcesList(
         array $definition,
