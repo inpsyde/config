@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config;
 
+use function Brain\Monkey\Functions\expect;
 use Inpsyde\Config\Source\Constant;
 use Inpsyde\Config\Source\Environment;
 use Inpsyde\Config\Source\Source;
@@ -12,6 +13,53 @@ use MonkeryTestCase\BrainMonkeyWpTestCase;
 
 class ContainerFactoryTest extends BrainMonkeyWpTestCase
 {
+
+    private $environment = [];
+
+    /**
+     * @dataProvider buildContainerIntegrationData
+     * @group integration
+     */
+    public function testBuildContainerIntegration(array $definition, array $config, array $mockData, array $expected)
+    {
+        if (array_key_exists('env', $mockData)) {
+            foreach ( $mockData['env'] as $envName => $envValue) {
+                $this->putEnv($envName, $envValue);
+            }
+        }
+        $mockWpOption = function($function = 'get_option') {
+            return function($mock) use ($function) {
+                expect($function)
+                    ->with($mock['key'], $mock['default'])
+                    ->andReturn($mock['return']);
+            };
+        };
+        if (array_key_exists('wp_option',$mockData)) {
+            array_walk($mockData['wp_option'], $mockWpOption());
+        }
+        if (array_key_exists('wp_siteoption',$mockData)) {
+            array_walk($mockData['wp_siteoption'], $mockWpOption('get_site_option'));
+        }
+
+        $container = Loader::loadFromArray($definition,$config);
+
+        foreach ( $expected as $key => $expected) {
+            static::assertTrue(
+                $container->has($key),
+                "Test failed for key '{$key}'"
+            );
+            static::assertSame(
+                $expected,
+                $container->get($key),
+                "Test failed for key '{$key}'"
+            );
+        }
+    }
+
+    public function buildContainerIntegrationData(): array
+    {
+        return require __DIR__.'/../data/data-ContainerFactoryTest::testBuildContainerIntegration.php';
+    }
 
     /**
      * @group unit
@@ -103,73 +151,23 @@ class ContainerFactoryTest extends BrainMonkeyWpTestCase
      */
     public function buildSourcesListData(): array
     {
-        return [
-            [
-                'definition' => [
-                    'config.env.one' => [
-                        'source' => Source::SOURCE_ENV,
-                    ],
-                    'config.env.two' => [
-                        'source' => Source::SOURCE_ENV,
-                    ],
-                    'config.env.three' => [
-                        'source' => Source::SOURCE_ENV,
-                    ],
-                    'config.option.one' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                    ],
-                    'config.option.two' => [
-                        'source' => Source::SOURCE_WP_OPTION,
-                    ],
-                    'config.siteoption.one' => [
-                        'source' => Source::SOURCE_WP_SITEOPTION,
-                    ],
-                    'config.constant.one' => [
-                        'source' => Source::SOURCE_CONSTANT,
-                    ],
-                    'config.constant.two' => [
-                        'source' => Source::SOURCE_CONSTANT,
-                    ],
-                    'config.variable.one' => [
-                        'source' => Source::SOURCE_VARIABLE,
-                    ],
-                ],
-                'variableConfig' => [
-                    'config.variable.one' => true,
-                ],
-                'keysBySource' => [
-                    Source::SOURCE_ENV => [
-                        'config.env.one',
-                        'config.env.two',
-                        'config.env.three',
-                    ],
-                    Source::SOURCE_WP_OPTION => [
-                        'config.option.one',
-                        'config.option.two',
-                    ],
-                    Source::SOURCE_WP_SITEOPTION => [
-                        'config.siteoption.one',
-                    ],
-                    Source::SOURCE_CONSTANT => [
-                        'config.constant.one',
-                        'config.constant.two',
-                    ],
-                    Source::SOURCE_VARIABLE => [
-                        'config.variable.one',
-                    ],
-                ],
-                'expectations' => [
-                    'config.env.one' => Environment::class,
-                    'config.env.two' => Environment::class,
-                    'config.env.three' => Environment::class,
-                    'config.option.one' => WpOption::class,
-                    'config.option.two' => WpOption::class,
-                    'config.siteoption.one' => WpOption::class,
-                    'config.constant.one' => Constant::class,
-                    'config.constant.two' => Constant::class,
-                    'config.variable.one' => Variable::class,
-                ],
-            ],
-        ];
+        return require __DIR__.'/../data/data-ContainerFactoryTest::testBuildSourcesList.php';
+    }
+
+    private function putEnv(string $name, string $value)
+    {
+        $this->environment[$name] = $value;
+        putenv("{$name}={$value}");
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+
+        foreach (array_keys($this->environment) as $env) {
+            putenv($env);
+        }
+
+        $this->environment = [];
     }
 }
