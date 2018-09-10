@@ -68,7 +68,8 @@ The configuration definition follows an associative schema:
 Example:
 
     <?php
-    Namespace MyPlugin;
+    
+    namespace MyPlugin;
     
     use Inpsyde\Config\Source\Source;
     
