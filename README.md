@@ -18,14 +18,15 @@ When it comes to more complex plugins you want to have a reliable and uniform wa
 
 ### Build the Config object
 
-Build from a definition file:
+Create a configuration object from a definition file:
 
     <?php
     namespace Your\Plugin;
     
     use Inpsyde\Config\Loader;
     
-    Loader::loadFromFile(__DIR__.'/config/config-definition.php');
+    /* @var Config $config */
+    $config = Loader::loadFromFile(__DIR__.'/config/config-definition.php');
 
 Build from an array:
 
@@ -40,21 +41,27 @@ Build from an array:
 
 ### The Config interface
 
-```
+
 namespace Inpsyde\Config;
 
-interface Config
-{
+    <?php
+    
+    namespace Inpsyde\Config;
+    
+    use Inpsyde\Config\Exception\Exception;
+    
+    interface Config
+    {
+        /**
+         * @throws Exception
+         * @return mixed
+         */
+        public function get(string $key);
+    
+        public function has(string $key) : bool;
+    }
 
-    /**
-     * @return mixed
-     */
-    public function get(string $key);
-
-    public function has(string $key) : bool;
-}
-```
-This interface reminds of PSR-11 and I considered to extend or simply use PRS-11 as interface but the documentation says that it is explicitly meant as common interface for [_dependency injection containers_](https://www.php-fig.org/psr/psr-11/).
+This interface reminds of PSR-11 and we considered to extend or simply use PRS-11 as interface but the documentation says that it is explicitly meant as common interface for [_dependency injection containers_](https://www.php-fig.org/psr/psr-11/).
 
 Also mixing up DI-Containers with config containers is not a good thing as both targeting different purposes.
 
@@ -68,6 +75,7 @@ The configuration definition follows an associative schema:
 Example:
 
     <?php
+    // plugin-config.php
     
     namespace MyPlugin;
     
@@ -113,11 +121,12 @@ Example:
 
 With this declaration in place getting the configuration is as easy as:
 
-```
-$apiUrl = $config->get('message.api.endpoint');
-$floatValue = $config->get('domain.some.key');
-$customFilteredValue = $config->get('domain.some.komplex_value');
-```
+    <?php
+    
+    $apiUrl = $config->get('message.api.endpoint');
+    $floatValue = $config->get('domain.some.key');
+    $customFilteredValue = $config->get('domain.some.komplex_value');
+
 
 ### Available sources
 
@@ -164,9 +173,9 @@ Sometimes it's useful to define configuration values on runtime. This is how you
 
 ## Roadmap
 
- * Complete tests and implementation
+ * Move the interface in a separate package  
  * Change current working name `inpsyde/dev1-config` to `inpsyde/config` if everyone agrees
- * Maybe think about namespace support to split config objects into sub-config that is only aware of a specific namespace. As namespace separator the `.` is considered to be used.
+ * Maybe think about namespace support of the keys to split config objects into sub-config that is only aware of a specific namespace. As namespace separator the `.` is considered to be used.
  * Maybe allow `callable` as default value factory
  * Define a stack of sources for a single key to fall back to another source if the primary one is not defined (e.g. allow a default setting for multisite that can be overridden for a single site)
 
