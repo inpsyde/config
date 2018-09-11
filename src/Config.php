@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace Inpsyde\Config;
 
-use Inpsyde\Config\Exception\UnknownKey;
+use Inpsyde\Config\Exception\Exception;
 
 interface Config
 {
 
     /**
-     * @throws UnknownKey
+     * @throws Exception
      * @return mixed
      */
     public function get(string $key);
