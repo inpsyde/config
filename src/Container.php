@@ -25,7 +25,7 @@ final class Container implements Config
 
     public function get(string $key)
     {
-        if (! array_key_exists($key, $this->sources)){
+        if (! array_key_exists($key, $this->sources)) {
             throw new UnknownKey("No configuration configured for '{$key}'");
         }
 
