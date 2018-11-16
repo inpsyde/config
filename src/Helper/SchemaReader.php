@@ -20,7 +20,6 @@ class SchemaReader
 
     public function hasDefault(string $key, Schema $schema): bool
     {
-
         return array_key_exists(
             'defaultValue',
             $schema->getDefinition($key)
@@ -29,7 +28,7 @@ class SchemaReader
 
     public function defaultValue(string $key, Schema $schema)
     {
-        if (! $this->hasDefault($key,$schema)) {
+        if (! $this->hasDefault($key, $schema)) {
             throw new MissingDefaultValue("Key: '{$key}'");
         }
 
