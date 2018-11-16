@@ -19,7 +19,8 @@
         }
     ],
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.0",
+        "inpsyde/config-interface": "^1.0"
     },
     "require-dev": {
         "inpsyde/php-coding-standards": "@stable",
@@ -34,5 +35,11 @@
         "ci": [
             "vendor/bin/phpcs"
         ]
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:inpsyde/config-interface.git"
+        }
+    ]
 }

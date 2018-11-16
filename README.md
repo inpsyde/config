@@ -1,18 +1,12 @@
 # Inpsyde Config
 
-Key-value config management. The package provides a simple interface to read configuration regardless how the configuration is actually provided (either by an environment variable or WordPress option table or a PHP constant).
-
-The package provides declaration schema for configuration sources and filtering/validating.
+This library is an implementation of the `inpsyde/config-interface`. It provides uniform configuration management and filtering no matter if the values are provided by environment variables, WordPress database, PHP constants or variables.
 
 ## Installation
 
 ```
 $ composer require inpsyde/config
 ```
-
-## Why
-
-When it comes to more complex plugins you want to have a reliable and uniform way to access your configuration. Instead of coupling your business logic to details about configuration you can depend on an abstract configuration interface.
 
 ## Usage
 
@@ -25,8 +19,8 @@ Create a configuration object from a definition file:
     
     use Inpsyde\Config\Loader;
     
-    /* @var Config $config */
-    $config = Loader::loadFromFile(__DIR__.'/config/config-definition.php');
+    /* @var \Inpsyde\Config\Config $config */
+    $config = Loader::loadFromFile(__DIR__.'/config/plugin-config.php');
 
 Build from an array:
 
@@ -39,43 +33,22 @@ Build from an array:
     /* @var Config $config */
     $config = Loader::loadFromArray( [ /* config definition */ ] );
 
-### The Config interface
-
-
-namespace Inpsyde\Config;
-
-    <?php
-    
-    namespace Inpsyde\Config;
-    
-    use Inpsyde\Config\Exception\Exception;
-    
-    interface Config
-    {
-        /**
-         * @throws Exception
-         * @return mixed
-         */
-        public function get(string $key);
-    
-        public function has(string $key) : bool;
-    }
-
-This interface reminds of PSR-11 and we considered to extend or simply use PRS-11 as interface but the documentation says that it is explicitly meant as common interface for [_dependency injection containers_](https://www.php-fig.org/psr/psr-11/).
-
-Also mixing up DI-Containers with config containers is not a good thing as both targeting different purposes.
-
 
 ### Configuration schema
 
 The configuration definition follows an associative schema:
 
-    configKey => definition
+    string:configKey => array (
+        'source' => string
+        'source_name' => string
+        'default_value' => mixed, optional
+        'filter' => int|callable, optional
+    )
 
 Example:
 
     <?php
-    // plugin-config.php
+    // config/plugin-config.php
     
     namespace MyPlugin;
     
@@ -85,11 +58,11 @@ Example:
         'message.api.endpoint' => [
             // The configuration is read from an environment variable
             'source' => Source::SOURCE_ENV,
-            // This is the name of this env variable
+            // This is the name of the env variable
             'source_name' => 'SOME_ENV_VARIABLE',
             // Optional: you can provide a default value as fallback if the variable is not set
             'default_value' => 'http://api.tld/endpoint',
-            // Optional: If the variable is set, pass it throu filter_var() with the following filter
+            // Optional: If the variable is set, pass it to filter_var() using the following filter argument
             'filter' => FILTER_VALIDATE_URL,
         ],
         'domain.some.key' => [
@@ -119,7 +92,7 @@ Example:
     ];
 
 
-With this declaration in place getting the configuration is as easy as:
+With this declaration in place reading configuration value is done like this:
 
     <?php
     
@@ -141,10 +114,10 @@ With this declaration in place getting the configuration is as easy as:
 
 ### Defining configuration values on runtime
 
-Sometimes it's useful to define configuration values on runtime. This is how you can do:
+Sometimes it's useful to define configuration values on runtime (`Source::VARIABLE`). This is how you can do:
 
     <?php
-    // config-schema.php
+    // plugin-config.php
     
     namespace MyPlugin;
     
@@ -165,7 +138,7 @@ Sometimes it's useful to define configuration values on runtime. This is how you
     use Inpsyde\Config\Loader;
     
     $container = Loader::loadFromFile(
-        'config-schema.php',
+        'plugin-config.php',
         [
             'myPlugin.baseDir' => __DIR__
         ]
@@ -173,7 +146,6 @@ Sometimes it's useful to define configuration values on runtime. This is how you
 
 ## Roadmap
 
- * Move the interface in a separate package  
  * Change current working name `inpsyde/dev1-config` to `inpsyde/config` if everyone agrees
  * Maybe think about namespace support of the keys to split config objects into sub-config that is only aware of a specific namespace. As namespace separator the `.` is considered to be used.
  * Maybe allow `callable` as default value factory
@@ -185,10 +157,10 @@ The team at [Inpsyde](https://inpsyde.com) is engineering the Web since 2006.
 
 ## License
 
-Copyright (c) 2018 David Naber, Inpsyde
+Copyright (c) 2018 David Naber, Inpsyde GmbH
 
 Good news, this plugin is free for everyone! Since it's released under the [MIT License](LICENSE) you can use it free of charge on your personal or commercial website.
 
 ## Contributing
 
-All feedback / bug reports / pull requests are welcome.
+All feedback, bug reports and pull requests are welcome.
