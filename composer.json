@@ -1,5 +1,5 @@
 {
-    "name": "inpsyde/dev1-config",
+    "name": "inpsyde/config",
     "description": "Key-value config management",
     "minimum-stability": "dev",
     "prefer-stable": true,
