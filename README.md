@@ -146,10 +146,9 @@ Sometimes it's useful to define configuration values on runtime (`Source::VARIAB
 
 ## Roadmap
 
- * Change current working name `inpsyde/dev1-config` to `inpsyde/config` if everyone agrees
- * Maybe think about namespace support of the keys to split config objects into sub-config that is only aware of a specific namespace. As namespace separator the `.` is considered to be used.
- * Maybe allow `callable` as default value factory
- * Define a stack of sources for a single key to fall back to another source if the primary one is not defined (e.g. allow a default setting for multisite that can be overridden for a single site)
+ * Think about namespace support of the keys to split config objects into sub-config that is only aware of a specific namespace. However, the namespace separator should be provided in `Inpsyde\Config\Config::NAMESPACE_SEPARATOR`
+ * Consider allowing `callable` as default value factory
+ * Define a stack of sources for a single key to fall back to another source if the primary one is not defined (e.g. allow a default setting for WordPress multisite that can be overridden for a single site)
 
 ## Crafted by Inpsyde
 
