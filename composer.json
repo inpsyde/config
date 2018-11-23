@@ -20,7 +20,7 @@
     ],
     "require": {
         "php": ">=7.0",
-        "inpsyde/config-interface": "dev-master"
+        "inpsyde/config-interface": "^1.0"
     },
     "require-dev": {
         "inpsyde/php-coding-standards": "@stable",
