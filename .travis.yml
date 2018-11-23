@@ -18,4 +18,4 @@ install:
 
 script:
   - $HOME/.composer/vendor/bin/phpunit
-  - ./vendor/bin/phpcs ./ --standard=./phpcs.config.xml
+  - ./vendor/bin/phpcs
