@@ -1,6 +1,6 @@
 {
     "name": "inpsyde/config",
-    "description": "Key-value config management",
+    "description": "WordPress aware key-value config management",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "license": "MIT",

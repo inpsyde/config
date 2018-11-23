@@ -1,6 +1,6 @@
 # Inpsyde Config
 
-This library is an implementation of the `inpsyde/config-interface`. It provides uniform configuration management and filtering no matter if the values are provided by environment variables, WordPress database, PHP constants or variables.
+This library is an implementation of the [`inpsyde/config-interface`](https://github.com/inpsyde/config-interface/). It provides uniform configuration management and filtering no matter if the values are provided by environment variables, WordPress database, PHP constants or variables.
 
 ## Installation
 
