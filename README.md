@@ -1,4 +1,5 @@
-# Inpsyde Config
+# Inpsyde Config [![Latest Stable Version](https://poser.pugx.org/inpsyde/config/v/stable?format=flat-square)](https://packagist.org/packages/inpsyde/config) [![Build Status](https://img.shields.io/travis-ci/inpsyde/config.svg?style=flat-square)](https://travis-ci.org/inpsyde/config) [![License](https://poser.pugx.org/inpsyde/config/license?format=flat-square)](https://packagist.org/packages/inpsyde/config)
+
 
 This library is an implementation of the [`inpsyde/config-interface`](https://github.com/inpsyde/config-interface/). It provides uniform configuration management and filtering no matter if the values are provided by environment variables, WordPress database, PHP constants or variables.
 
