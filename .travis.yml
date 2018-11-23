@@ -13,7 +13,9 @@ cache:
     - vendor
 
 install:
+  - composer global require phpunit/phpunit:^7.4
   - composer install
 
 script:
-- ./vendor/bin/phpcs ./ --standard=./phpcs.config.xml
+  - $HOME/.composer/vendor/bin/phpunit
+  - ./vendor/bin/phpcs ./ --standard=./phpcs.config.xml
