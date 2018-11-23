@@ -9,31 +9,35 @@ This library is an implementation of the [`inpsyde/config-interface`](https://gi
 $ composer require inpsyde/config
 ```
 
+
 ## Usage
 
 ### Build the Config object
 
 Create a configuration object from a definition file:
 
-    <?php
-    namespace Your\Plugin;
-    
-    use Inpsyde\Config\Loader;
-    
-    /* @var \Inpsyde\Config\Config $config */
-    $config = Loader::loadFromFile(__DIR__.'/config/plugin-config.php');
+```php
+<?php
+namespace Your\Plugin;
+
+use Inpsyde\Config\Loader;
+
+/* @var \Inpsyde\Config\Config $config */
+$config = Loader::loadFromFile(__DIR__.'/config/plugin-config.php');
+```
 
 Build from an array:
 
-    <?php
-    namespace Your\Plugin;
-    
-    use Inpsyde\Config\Loader;
-    use Inpsyde\Config\Config;
-    
-    /* @var Config $config */
-    $config = Loader::loadFromArray( [ /* config definition */ ] );
+```php
+<?php
+namespace Your\Plugin;
 
+use Inpsyde\Config\Loader;
+use Inpsyde\Config\Config;
+
+/* @var Config $config */
+$config = Loader::loadFromArray( [ /* config definition */ ] );
+```
 
 ### Configuration schema
 
@@ -48,102 +52,108 @@ The configuration definition follows an associative schema:
 
 Example:
 
-    <?php
-    // config/plugin-config.php
-    
-    namespace MyPlugin;
-    
-    use Inpsyde\Config\Source\Source;
-    
-    return [
-        'message.api.endpoint' => [
-            // The configuration is read from an environment variable
-            'source' => Source::SOURCE_ENV,
-            // This is the name of the env variable
-            'source_name' => 'SOME_ENV_VARIABLE',
-            // Optional: you can provide a default value as fallback if the variable is not set
-            'default_value' => 'http://api.tld/endpoint',
-            // Optional: If the variable is set, pass it to filter_var() using the following filter argument
-            'filter' => FILTER_VALIDATE_URL,
-        ],
-        'domain.some.key' => [
-            // In this case the option is read from WP site options
-            'source' => Source::SOURCE_WP_SITEOPTION,
-            // With this option key
-            'source_name' => '_option_key',
-            'filter' => FILTER_VALIDATE_FLOAT,
-        ],
-        /**
-         * You can also provide callables as filter to do
-         * more complex filtering
-         */
-        'domain.some.komplex_value' => [
-            'source' => Source::SOURCE_WP_OPTION,
-            'source_name' => '_option_key',
-            'default_value' => null,
-            'filter' => function($value): string {
-    
-                return filter_var(
-                    $value,
-                    FILTER_SANITIZE_ENCODED,
-                    FILTER_FLAG_STRIP_HIGH & FILTER_FLAG_STRIP_BACKTICK
-                );
-            },
-        ],
-    ];
+```php
+<?php
+// config/plugin-config.php
 
+namespace MyPlugin;
+
+use Inpsyde\Config\Source\Source;
+
+return [
+    'message.api.endpoint' => [
+        // The configuration is read from an environment variable
+        'source' => Source::SOURCE_ENV,
+        // This is the name of the env variable
+        'source_name' => 'SOME_ENV_VARIABLE',
+        // Optional: you can provide a default value as fallback if the variable is not set
+        'default_value' => 'http://api.tld/endpoint',
+        // Optional: If the variable is set, pass it to filter_var() using the following filter argument
+        'filter' => FILTER_VALIDATE_URL,
+    ],
+    'domain.some.key' => [
+        // In this case the option is read from WP site options
+        'source' => Source::SOURCE_WP_SITEOPTION,
+        // With this option key
+        'source_name' => '_option_key',
+        'filter' => FILTER_VALIDATE_FLOAT,
+    ],
+    /**
+     * You can also provide callables as filter to do
+     * more complex filtering
+     */
+    'domain.some.komplex_value' => [
+        'source' => Source::SOURCE_WP_OPTION,
+        'source_name' => '_option_key',
+        'default_value' => null,
+        'filter' => function($value): string {
+
+            return filter_var(
+                $value,
+                FILTER_SANITIZE_ENCODED,
+                FILTER_FLAG_STRIP_HIGH & FILTER_FLAG_STRIP_BACKTICK
+            );
+        },
+    ],
+];
+```
 
 With this declaration in place reading configuration value is done like this:
 
-    <?php
-    
-    $apiUrl = $config->get('message.api.endpoint');
-    $floatValue = $config->get('domain.some.key');
-    $customFilteredValue = $config->get('domain.some.komplex_value');
+```php
+<?php
 
+$apiUrl = $config->get('message.api.endpoint');
+$floatValue = $config->get('domain.some.key');
+$customFilteredValue = $config->get('domain.some.komplex_value');
+```
 
 ### Available sources
 
-    <?php
-    use Inpsyde\Config\Source\Source;
-    
-    Source::SOURCE_ENV
-    Source::SOURCE_WP_OPTION
-    Source::WP_SITE_OPTION
-    Source::CONSTANT
-    Source::VARIABLE
+```php
+<?php
+use Inpsyde\Config\Source\Source;
+
+Source::SOURCE_ENV
+Source::SOURCE_WP_OPTION
+Source::WP_SITE_OPTION
+Source::CONSTANT
+Source::VARIABLE
+```
 
 ### Defining configuration values on runtime
 
 Sometimes it's useful to define configuration values on runtime (`Source::VARIABLE`). This is how you can do:
 
-    <?php
-    // plugin-config.php
-    
-    namespace MyPlugin;
-    
-    use Inpsyde\Config\Source\Source;
-    
-    return [
-        'myPlugin.baseDir' => [
-            'source' => Source::VARIABLE,
-        ],
-    ];
+```php
+<?php
+// plugin-config.php
 
+namespace MyPlugin;
 
-    <?php
-    // my-plugin.php
-    
-    namespace MyPlugin;
-    
-    use Inpsyde\Config\Loader;
-    
-    $container = Loader::loadFromFile(
-        'plugin-config.php',
-        [
-            'myPlugin.baseDir' => __DIR__
-        ]
-    );
+use Inpsyde\Config\Source\Source;
+
+return [
+    'myPlugin.baseDir' => [
+        'source' => Source::VARIABLE,
+    ],
+];
+```
+```php
+<?php
+// my-plugin.php
+
+namespace MyPlugin;
+
+use Inpsyde\Config\Loader;
+
+$container = Loader::loadFromFile(
+    'plugin-config.php',
+    [
+        'myPlugin.baseDir' => __DIR__
+    ]
+);
+```
 
 ## Roadmap
 
