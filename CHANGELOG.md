@@ -4,8 +4,5 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 (This document follows the structure described in http://keepachangelog.com/)
 
-## [Unreleased]
-### Added
-
-
-[Unreleased]: http://github.com/VENDOR/PROJECT/compare/
+## 1.0.0
+* Initial release
