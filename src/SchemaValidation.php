@@ -57,9 +57,11 @@ class SchemaValidation
         $requireField('source');
         if (Source::SOURCE_VARIABLE !== $definition['source']) {
             $requireField('sourceName');
-        } else {
-            $definition['sourceName'] = null;
+
+            return $definition;
         }
+
+        $definition['sourceName'] = null;
 
         return $definition;
     }

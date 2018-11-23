@@ -41,6 +41,7 @@ final class Variable implements Source
         Filter $filter = null,
         SchemaReader $reader = null
     ) {
+
         $this->schema = $schema;
         $this->filter = $filter
             ?: new Filter();

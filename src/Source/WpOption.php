@@ -37,6 +37,7 @@ final class WpOption implements Source
         Filter $filter = null,
         SchemaReader $reader = null
     ) {
+
         $this->optionLoader = $optionLoader;
         $this->schema = $schema;
         $this->filter = $filter
@@ -93,8 +94,12 @@ final class WpOption implements Source
             : false;
     }
 
-    public static function asWpOption(Schema $schema, Filter $filter = null, SchemaReader $reader = null): self
-    {
+    public static function asWpOption(
+        Schema $schema,
+        Filter $filter = null,
+        SchemaReader $reader = null
+    ): self {
+
         $filter or $filter = new Filter();
 
         return new self(
@@ -107,8 +112,12 @@ final class WpOption implements Source
         );
     }
 
-    public static function asWpSiteOption(Schema $schema, Filter $filter = null, SchemaReader $reader = null): self
-    {
+    public static function asWpSiteOption(
+        Schema $schema,
+        Filter $filter = null,
+        SchemaReader $reader = null
+    ): self {
+
         $filter or $filter = new Filter();
 
         return new self(

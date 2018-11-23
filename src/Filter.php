@@ -39,7 +39,7 @@ class Filter
 
             // false is a valid value if the filter is set to FILTER_VALIDATE_BOOLEAN
             return false !== $variable || FILTER_VALIDATE_BOOLEAN !== $schema['filter'];
-        } catch (\Throwable $e) {
+        } catch (\Throwable $exception) {
             return false;
         }
     }

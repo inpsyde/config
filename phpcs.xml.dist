@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 <ruleset name="Inpsde Coding Standard">
-    <rule ref="Inpsyde" />
+    <rule ref="Inpsyde">
+        <exclude name="Inpsyde.CodeQuality.ArgumentTypeDeclaration.NoArgumentType" />
+        <exclude name="Inpsyde.CodeQuality.ReturnTypeDeclaration.NoReturnType" />
+        <exclude name="Inpsyde.CodeQuality.NoAccessors.NoGetter" />
+    </rule>
     <file>./src</file>
 </ruleset>

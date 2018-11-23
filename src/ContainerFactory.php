@@ -58,10 +58,18 @@ class ContainerFactory
     private function sourceFactories(): array
     {
         return [
-            Source::SOURCE_ENV => function (Schema $schema, Filter $filter = null, SchemaReader $reader = null) {
+            Source::SOURCE_ENV => function (
+                Schema $schema,
+                Filter $filter = null,
+                SchemaReader $reader = null
+            ) {
                 return new Environment($schema, $filter, $reader);
             },
-            Source::SOURCE_WP_OPTION => function (Schema $schema, Filter $filter = null, SchemaReader $reader = null) {
+            Source::SOURCE_WP_OPTION => function (
+                Schema $schema,
+                Filter $filter = null,
+                SchemaReader $reader = null
+            ) {
                 return WpOption::asWpOption($schema, $filter, $reader);
             },
             Source::SOURCE_WP_SITEOPTION => function (
@@ -71,7 +79,11 @@ class ContainerFactory
             ) {
                 return WpOption::asWpSiteOption($schema, $filter, $reader);
             },
-            Source::SOURCE_CONSTANT => function (Schema $schema, Filter $filter = null, SchemaReader $reader = null) {
+            Source::SOURCE_CONSTANT => function (
+                Schema $schema,
+                Filter $filter = null,
+                SchemaReader $reader = null
+            ) {
                 return new Constant($schema, $filter, $reader);
             },
             Source::SOURCE_VARIABLE => function (
